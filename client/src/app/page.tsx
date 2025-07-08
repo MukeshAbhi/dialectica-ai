@@ -3,95 +3,167 @@
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 
+interface Message {
+    id: string;
+    user: string;
+    content: string;
+    timestamp: Date;
+    isCurrentUser: boolean;
+}
+
 export default function HomePage() {
     const [inputText, setInputText] = useState('');
-    const [charCount, setCharCount] = useState(0);
-    const maxChars = 1000;
-
-    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const text = e.target.value;
-        if (text.length <= maxChars) {
-            setInputText(text);
-            setCharCount(text.length);
+    const [messages, setMessages] = useState<Message[]>([
+        {
+            id: '1',
+            user: 'Alice',
+            content: 'Hey everyone! What do you think about the impact of AI on society?',
+            timestamp: new Date(Date.now() - 300000),
+            isCurrentUser: false
+        },
+        {
+            id: '2',
+            user: 'Bob',
+            content: 'I think AI has great potential, but we need to be careful about job displacement.',
+            timestamp: new Date(Date.now() - 240000),
+            isCurrentUser: false
+        },
+        {
+            id: '3',
+            user: 'You',
+            content: 'That\'s a valid concern. But AI could also create new opportunities we haven\'t thought of yet.',
+            timestamp: new Date(Date.now() - 180000),
+            isCurrentUser: true
         }
-    };
+    ]);
+    const [currentUser] = useState('You');
+    const [roomName] = useState('AI & Society Discussion');
+    const [onlineUsers] = useState(['Alice', 'Bob', 'Charlie', 'You']);
 
-    const handleClear = () => {
-        setInputText('');
-        setCharCount(0);
-    };
-
-    const handleSubmit = () => {
+    const handleSendMessage = () => {
         if (inputText.trim()) {
-            console.log('Submitted text:', inputText);
-            // Add your submission logic here
+            const newMessage: Message = {
+                id: Date.now().toString(),
+                user: currentUser,
+                content: inputText.trim(),
+                timestamp: new Date(),
+                isCurrentUser: true
+            };
+            setMessages(prev => [...prev, newMessage]);
+            setInputText('');
         }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    };
+
+    const formatTime = (date: Date) => {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-            <div className="max-w-4xl mx-auto px-4">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                        DebateRoom AI
-                    </h1>
-                    <p className="text-gray-600 text-lg">
-                        Share your thoughts and engage in meaningful discussions
-                    </p>
+        <div className="h-screen bg-gray-100 flex">
+            {/* Sidebar */}
+            <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+                {/* Room Header */}
+                <div className="p-4 border-b border-gray-200">
+                    <h1 className="text-xl font-bold text-gray-800">{roomName}</h1>
+                    <p className="text-sm text-gray-500">{onlineUsers.length} members online</p>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                    <div className="mb-6">
-                        <label htmlFor="main-textarea" className="block text-lg font-semibold text-gray-700 mb-3">
-                            What's on your mind?
-                        </label>
-
-                        <Textarea
-                            id="main-textarea"
-                            value={inputText}
-                            onChange={handleTextChange}
-                            placeholder="Share your thoughts, start a debate, or ask a question..."
-                            className="w-full h-48 resize-none border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 rounded-md p-3"
-                        />
-
-                        <div className="flex justify-between items-center mt-3">
-                            <span className={`text-sm ${charCount > maxChars * 0.9 ? 'text-red-500' : 'text-gray-500'}`}>
-                                {charCount}/{maxChars} characters
-                            </span>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={handleClear}
-                                    disabled={!inputText}
-                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    Clear
-                                </button>
-
-                                <button
-                                    onClick={handleSubmit}
-                                    disabled={!inputText.trim()}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                                >
-                                    Submit
-                                </button>
+                {/* Online Users */}
+                <div className="flex-1 p-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Online Now</h3>
+                    <div className="space-y-2">
+                        {onlineUsers.map((user, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className={`text-sm ${user === currentUser ? 'font-semibold text-blue-600' : 'text-gray-700'}`}>
+                                    {user}
+                                </span>
                             </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Room Actions */}
+                <div className="p-4 border-t border-gray-200">
+                    <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
+                        Invite Friends
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Chat Area */}
+            <div className="flex-1 flex flex-col">
+                {/* Chat Header */}
+                <div className="bg-white border-b border-gray-200 p-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-800">General Discussion</h2>
+                            <p className="text-sm text-gray-500">Share your thoughts and debate respectfully</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                                Settings
+                            </button>
+                            <button className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors">
+                                Leave Room
+                            </button>
                         </div>
                     </div>
-
-                    {inputText && (
-                        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h3 className="font-semibold text-gray-700 mb-2">Preview:</h3>
-                            <p className="text-gray-600 whitespace-pre-wrap">{inputText}</p>
-                        </div>
-                    )}
                 </div>
 
-                <div className="mt-8 text-center">
-                    <p className="text-gray-600">
-                        Ready to dive deeper?
-                        <span className="text-blue-600 font-medium ml-1">Join a debate room</span>
-                    </p>
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messages.map((message) => (
+                        <div key={message.id} className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                message.isCurrentUser
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white border border-gray-200 text-gray-800'
+                            }`}>
+                                {!message.isCurrentUser && (
+                                    <div className="text-xs font-semibold mb-1 text-blue-600">
+                                        {message.user}
+                                    </div>
+                                )}
+                                <div className="text-sm">{message.content}</div>
+                                <div className={`text-xs mt-1 ${
+                                    message.isCurrentUser ? 'text-blue-100' : 'text-gray-500'
+                                }`}>
+                                    {formatTime(message.timestamp)}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Message Input */}
+                <div className="bg-white border-t border-gray-200 p-4">
+                    <div className="flex gap-3">
+                        <Textarea
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
+                            className="flex-1 min-h-[44px] max-h-32 resize-none border border-gray-300 rounded-md p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                        />
+                        <button
+                            onClick={handleSendMessage}
+                            disabled={!inputText.trim()}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium self-end"
+                        >
+                            Send
+                        </button>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                        {inputText.length}/500 characters
+                    </div>
                 </div>
             </div>
         </div>
