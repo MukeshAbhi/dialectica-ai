@@ -23,23 +23,26 @@ interface DebateStats {
 export default function HomePage() {
     const [inputText, setInputText] = useState('');
     const [messages, setMessages] = useState<Message[]>([
-        {
-            id: '1',
-            user: 'Alice',
-            content: 'I believe AI regulation is absolutely necessary. Without proper oversight, we risk creating systems that could harm society through biased decision-making, privacy violations, and job displacement without adequate protections for workers.',
-            timestamp: new Date(Date.now() - 300000),
-            isCurrentUser: false,
-            side: 'pro'
-        },
-        {
-            id: '2',
-            user: 'You',
-            content: 'While I understand the concerns, over-regulation could stifle innovation and prevent us from realizing AI\'s full potential to solve global challenges like climate change, disease, and poverty. We need balanced approaches, not restrictive regulations.',
-            timestamp: new Date(Date.now() - 180000),
-            isCurrentUser: true,
-            side: 'con'
-        }
+        // {
+        //     id: '1',
+        //     user: 'Alice',
+        //     content: 'I believe AI regulation is absolutely necessary. Without proper oversight, we risk creating systems that could harm society through biased decision-making, privacy violations, and job displacement without adequate protections for workers.',
+        //     timestamp: new Date(Date.now() - 300000),
+        //     isCurrentUser: false,
+        //     side: 'pro'
+        // },
+        // {
+        //     id: '2',
+        //     user: 'You',
+        //     content: 'While I understand the concerns, over-regulation could stifle innovation and prevent us from realizing AI\'s full potential to solve global challenges like climate change, disease, and poverty. We need balanced approaches, not restrictive regulations.',
+        //     timestamp: new Date(Date.now() - 180000),
+        //     isCurrentUser: true,
+        //     side: 'con'
+        // }
     ]);
+    // => removing hardcoded messages
+
+
     const [currentUser] = useState('You');
     const [opponent] = useState('Alice');
     const [currentUserSide] = useState<'pro' | 'con'>('con');
@@ -54,7 +57,13 @@ export default function HomePage() {
         socket.emit("debate:join", { user: currentUser, debateId: "room1" });
 
         socket.on("chat:message", (msg: Message) => {
-            setMessages(prev => [...prev, msg]);
+            setMessages(prev => [
+                ...prev,
+                {
+                    ...msg,
+                    timestamp: new Date(msg.timestamp) // rehydrating timestamp to Date object
+                }
+            ]);
         });
 
         return () => {
@@ -70,7 +79,7 @@ export default function HomePage() {
                     id: Date.now().toString(),
                     user: currentUser,
                     content: inputText.trim(),
-                    timestamp: new Date(),
+                    timestamp: new Date().toISOString(),
                     isCurrentUser: true,
                     side: currentUserSide
                 }
