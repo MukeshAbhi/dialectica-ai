@@ -44,46 +44,135 @@ export default function HomePage() {
 
 
     const [currentUser] = useState('You');
-    const [opponent] = useState('Alice');
-    const [currentUserSide] = useState<'pro' | 'con'>('con');
-    const [debateStats] = useState<DebateStats>({
-        totalArguments: 2,
-        proArguments: 1,
-        conArguments: 1,
-        timeRemaining: '12:34'
+    const [opponent, setOpponent] = useState('Waiting for opponent...');
+    const [currentUserSide, setCurrentUserSide] = useState<'pro' | 'con'>('pro');
+    const [currentRoomId, setCurrentRoomId] = useState('room1');
+    const [currentUserId, setCurrentUserId] = useState('');
+    const [debateStats, setDebateStats] = useState<DebateStats>({
+        totalArguments: 0,
+        proArguments: 0,
+        conArguments: 0,
+        timeRemaining: '15:00'
     });
 
     useEffect(() => {
-        socket.emit("debate:join", { user: currentUser, debateId: "room1" });
+        // Reset state when component mounts
+        setMessages([]);
+        setOpponent('Waiting for opponent...');
+        setCurrentRoomId('room1');
+        setCurrentUserId('');
 
+        socket.emit("debate:join", { user: currentUser, debateId: "room" });
+
+        // Handle incoming messages
         socket.on("chat:message", (msg: Message) => {
             setMessages(prev => [
                 ...prev,
                 {
                     ...msg,
-                    timestamp: new Date(msg.timestamp) // rehydrating timestamp to Date object
+                    timestamp: new Date(msg.timestamp),
+                    isCurrentUser: false // Messages from other clients are not current user's
                 }
             ]);
         });
 
+        // Handle room and side assignment from server
+        socket.on("debate:room-assigned", ({ roomId, side, userId }: {
+            roomId: string;
+            side: 'pro' | 'con';
+            userId: string
+        }) => {
+            console.log(`Assigned to room: ${roomId}, side: ${side.toUpperCase()}, userId: ${userId}`);
+            setCurrentRoomId(roomId);
+            setCurrentUserSide(side);
+            setCurrentUserId(userId);
+
+            // Reset messages and opponent when joining new room
+            setMessages([]);
+            setOpponent('Waiting for opponent...');
+        });
+
+        // Handle participants updates
+        socket.on("debate:participants-update", ({ participants }: {
+            participants: Array<{ user: string; side: 'pro' | 'con'; socketId: string }>
+        }) => {
+            console.log('Participants updated:', participants);
+            console.log('Current userId:', currentUserId);
+            console.log('Current roomId:', currentRoomId);
+
+            // Update opponent info - use setTimeout to ensure state is updated
+            setTimeout(() => {
+                if (currentUserId) {
+                    const otherParticipant = participants.find(p => p.socketId !== currentUserId);
+                    if (otherParticipant) {
+                        console.log('Setting opponent to:', otherParticipant.user);
+                        setOpponent(otherParticipant.user);
+                    } else {
+                        console.log('No opponent found, setting to waiting...');
+                        setOpponent('Waiting for opponent...');
+                    }
+                } else {
+                    console.log('CurrentUserId not set yet, deferring opponent update');
+                }
+            }, 50);
+
+            // Update debate stats
+            setDebateStats(prev => ({
+                ...prev,
+                totalArguments: messages.length,
+                proArguments: messages.filter(m => m.side === 'pro').length,
+                conArguments: messages.filter(m => m.side === 'con').length
+            }));
+        });
+
+        // Handle room full (shouldn't happen with new logic, but keep for safety)
+        socket.on("debate:room-full", () => {
+            alert("All debate rooms are currently full. Please try again later.");
+        });
+
         return () => {
-            socket.off("chat:message"); // not disconnecting global socket, instead removing specific listener
-            // can  emit "debate:leave" here
-            //socket.emit("debate:leave");
+            socket.off("chat:message");
+            socket.off("debate:room-assigned");
+            socket.off("debate:participants-update");
+            socket.off("debate:room-full");
+            socket.off("debate:get-participants");
+            if (currentRoomId) {
+                socket.emit("debate:leave", { user: currentUser, debateId: currentRoomId });
+            }
         };
-    }, [currentUser]);
+    }, [currentUser]); // Only depend on currentUser    // Separate effect to handle participant updates when currentUserId changes
+    useEffect(() => {
+        if (currentUserId && currentRoomId && currentRoomId !== 'room1') {
+            // Only request participants if we're not in the default room
+            const timeout = setTimeout(() => {
+                socket.emit("debate:get-participants", { debateId: currentRoomId });
+            }, 200);
+
+            return () => clearTimeout(timeout);
+        }
+    }, [currentUserId, currentRoomId]);
 
     const handleSendMessage = () => {
         if (inputText.trim()) {
+            const newMessage = {
+                id: Date.now().toString(),
+                user: currentUser,
+                content: inputText.trim(),
+                timestamp: new Date(),
+                isCurrentUser: true,
+                side: currentUserSide
+            };
+
+            // Add message locally first (for immediate UI feedback)
+            setMessages(prev => [...prev, newMessage]);
+
+            // Then emit to server (this will broadcast to other clients)
             socket.emit("chat:message", {
-                debateId: "room1",
+                debateId: currentRoomId,
                 message: {
-                    id: Date.now().toString(),
-                    user: currentUser,
-                    content: inputText.trim(),
-                    timestamp: new Date().toISOString(),
-                    isCurrentUser: true,
-                    side: currentUserSide
+                    ...newMessage,
+                    timestamp: newMessage.timestamp.toISOString(),
+                    isCurrentUser: false // For other clients, this won't be their message
                 }
             });
             setInputText('');
@@ -107,12 +196,14 @@ export default function HomePage() {
             <div className="w-75 bg-white/90 backdrop-blur-sm border-r border-gray-200 flex flex-col shadow-lg">
                 {/* Debate Header */}
                 <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 mb-3">
                         <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
                         <span className="text-sm font-medium">LIVE DEBATE</span>
                     </div>
                     <h1 className="text-lg font-bold">AI Ethics Debate</h1>
-                    <p className="text-blue-100 text-sm mt-1">Round 1 of 3</p>
+                    <p className="text-blue-100 text-sm mt-1">
+                        {currentRoomId.toUpperCase()} • Round 1 of 3 • ID: {currentUserId.slice(-6)}
+                    </p>
                 </div>
 
                 {/* Debate Topic */}
@@ -132,25 +223,73 @@ export default function HomePage() {
                 <div className="p-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-800 mb-4">PARTICIPANTS</h3>
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                A
-                            </div>
-                            <div className="flex-1">
-                                <div className="font-medium text-gray-800">{opponent}</div>
-                                <div className="text-xs text-green-600 font-medium">PRO REGULATION</div>
-                            </div>
-                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                Y
+                        {/* Current User */}
+                        <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+                            currentUserSide === 'pro'
+                                ? 'bg-green-50 border-green-200'
+                                : 'bg-red-50 border-red-200'
+                        }`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                                currentUserSide === 'pro' ? 'bg-green-500' : 'bg-red-500'
+                            }`}>
+                                {currentUser.charAt(0)}
                             </div>
                             <div className="flex-1">
                                 <div className="font-medium text-gray-800">{currentUser}</div>
-                                <div className="text-xs text-red-600 font-medium">AGAINST REGULATION</div>
+                                <div className={`text-xs font-medium ${
+                                    currentUserSide === 'pro' ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                    {currentUserSide === 'pro' ? 'PRO REGULATION' : 'AGAINST REGULATION'}
+                                </div>
                             </div>
-                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                            <div className={`w-2 h-2 rounded-full ${
+                                currentUserSide === 'pro' ? 'bg-green-400' : 'bg-red-400'
+                            }`}></div>
+                        </div>
+
+                        {/* Opponent */}
+                        <div className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 ${
+                            opponent === 'Waiting for opponent...'
+                                ? 'bg-gray-50 border-gray-200'
+                                : currentUserSide === 'pro'
+                                    ? 'bg-red-50 border-red-200'
+                                    : 'bg-green-50 border-green-200'
+                        }`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm transition-all duration-300 ${
+                                opponent === 'Waiting for opponent...'
+                                    ? 'bg-gray-400'
+                                    : currentUserSide === 'pro'
+                                        ? 'bg-red-500'
+                                        : 'bg-green-500'
+                            }`}>
+                                {opponent === 'Waiting for opponent...' ? '?' : opponent.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                                <div className="font-medium text-gray-800">
+                                    {opponent === 'Waiting for opponent...' ? 'Opponent' : opponent}
+                                </div>
+                                <div className={`text-xs font-medium transition-all duration-300 ${
+                                    opponent === 'Waiting for opponent...'
+                                        ? 'text-gray-500'
+                                        : currentUserSide === 'pro'
+                                            ? 'text-red-600'
+                                            : 'text-green-600'
+                                }`}>
+                                    {opponent === 'Waiting for opponent...'
+                                        ? 'Waiting to join...'
+                                        : currentUserSide === 'pro'
+                                            ? 'AGAINST REGULATION'
+                                            : 'PRO REGULATION'
+                                    }
+                                </div>
+                            </div>
+                            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                opponent === 'Waiting for opponent...'
+                                    ? 'bg-gray-300 animate-pulse'
+                                    : currentUserSide === 'pro'
+                                        ? 'bg-red-400'
+                                        : 'bg-green-400'
+                            }`}></div>
                         </div>
                     </div>
                 </div>
@@ -206,16 +345,24 @@ export default function HomePage() {
                 {/* Debate Messages */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-transparent to-gray-50/30">
                     {messages.map((message, index) => (
-                        <div key={message.id} className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-2xl w-full ${message.isCurrentUser ? 'ml-12' : 'mr-12'}`}>
+                        <div key={message.id} className={`flex ${
+                            message.side === currentUserSide ? 'justify-end' : 'justify-start'
+                        }`}>
+                            <div className={`max-w-2xl w-full ${
+                                message.side === currentUserSide ? 'ml-12' : 'mr-12'
+                            }`}>
                                 {/* Argument Header */}
-                                <div className={`flex items-center gap-3 mb-2 ${message.isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                                <div className={`flex items-center gap-3 mb-2 ${
+                                    message.side === currentUserSide ? 'flex-row-reverse' : 'flex-row'
+                                }`}>
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
                                         message.side === 'pro' ? 'bg-green-500' : 'bg-red-500'
                                     }`}>
                                         {message.user.charAt(0)}
                                     </div>
-                                    <div className={`flex items-center gap-2 ${message.isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <div className={`flex items-center gap-2 ${
+                                        message.side === currentUserSide ? 'flex-row-reverse' : 'flex-row'
+                                    }`}>
                                         <span className="font-semibold text-gray-800">{message.user}</span>
                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                                             message.side === 'pro'
@@ -232,15 +379,23 @@ export default function HomePage() {
 
                                 {/* Message Content */}
                                 <div className={`relative ${
-                                    message.isCurrentUser
-                                        ? 'bg-gradient-to-br from-red-500 to-red-600 text-white'
-                                        : 'bg-white border-2 border-green-200 text-gray-800'
+                                    message.side === currentUserSide
+                                        ? message.side === 'pro'
+                                            ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
+                                            : 'bg-gradient-to-br from-red-500 to-red-600 text-white'
+                                        : message.side === 'pro'
+                                            ? 'bg-white border-2 border-green-200 text-gray-800'
+                                            : 'bg-white border-2 border-red-200 text-gray-800'
                                 } rounded-xl p-5 shadow-lg`}>
                                     {/* Message bubble arrow */}
                                     <div className={`absolute top-4 w-3 h-3 transform rotate-45 ${
-                                        message.isCurrentUser
-                                            ? 'bg-red-500 -right-1'
-                                            : 'bg-white border-l-2 border-t-2 border-green-200 -left-1'
+                                        message.side === currentUserSide
+                                            ? message.side === 'pro'
+                                                ? 'bg-green-500 -right-1'
+                                                : 'bg-red-500 -right-1'
+                                            : message.side === 'pro'
+                                                ? 'bg-white border-l-2 border-t-2 border-green-200 -left-1'
+                                                : 'bg-white border-l-2 border-t-2 border-red-200 -left-1'
                                     }`}></div>
 
                                     <div className="text-sm leading-relaxed font-medium">
@@ -248,28 +403,36 @@ export default function HomePage() {
                                     </div>
 
                                     <div className={`flex items-center justify-between mt-3 pt-3 border-t ${
-                                        message.isCurrentUser
-                                            ? 'border-red-400/30'
+                                        message.side === currentUserSide
+                                            ? message.side === 'pro'
+                                                ? 'border-green-400/30'
+                                                : 'border-red-400/30'
                                             : 'border-gray-200'
                                     }`}>
                                         <div className={`text-xs ${
-                                            message.isCurrentUser
-                                                ? 'text-red-100'
+                                            message.side === currentUserSide
+                                                ? message.side === 'pro'
+                                                    ? 'text-green-100'
+                                                    : 'text-red-100'
                                                 : 'text-gray-500'
                                         }`}>
                                             {formatTime(message.timestamp)}
                                         </div>
                                         <div className="flex gap-2">
                                             <button className={`text-xs px-2 py-1 rounded transition-colors ${
-                                                message.isCurrentUser
-                                                    ? 'bg-red-400/20 text-white hover:bg-red-400/30'
+                                                message.side === currentUserSide
+                                                    ? message.side === 'pro'
+                                                        ? 'bg-green-400/20 text-white hover:bg-green-400/30'
+                                                        : 'bg-red-400/20 text-white hover:bg-red-400/30'
                                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}>
                                                 Counter
                                             </button>
                                             <button className={`text-xs px-2 py-1 rounded transition-colors ${
-                                                message.isCurrentUser
-                                                    ? 'bg-red-400/20 text-white hover:bg-red-400/30'
+                                                message.side === currentUserSide
+                                                    ? message.side === 'pro'
+                                                        ? 'bg-green-400/20 text-white hover:bg-green-400/30'
+                                                        : 'bg-red-400/20 text-white hover:bg-red-400/30'
                                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}>
                                                 Support
@@ -323,8 +486,12 @@ export default function HomePage() {
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                placeholder="Present your argument against regulation... Be specific and provide reasoning."
-                                className="min-h-[100px] max-h-40 resize-none border-2 border-gray-300 rounded-xl p-4 focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all text-sm leading-relaxed"
+                                placeholder={`Present your argument ${currentUserSide === 'pro' ? 'supporting' : 'against'} regulation... Be specific and provide reasoning.`}
+                                className={`min-h-[100px] max-h-40 resize-none border-2 border-gray-300 rounded-xl p-4 transition-all text-sm leading-relaxed ${
+                                    currentUserSide === 'pro'
+                                        ? 'focus:border-green-500 focus:ring-4 focus:ring-green-100'
+                                        : 'focus:border-red-500 focus:ring-4 focus:ring-red-100'
+                                }`}
                             />
                             <div className="flex justify-between items-center mt-2">
                                 <div className="text-xs text-gray-500">
@@ -339,7 +506,11 @@ export default function HomePage() {
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!inputText.trim()}
-                                className="px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold text-sm shadow-lg whitespace-nowrap"
+                                className={`px-6 py-4 text-white rounded-xl transition-all duration-200 font-semibold text-sm shadow-lg whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    currentUserSide === 'pro'
+                                        ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                                        : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
+                                }`}
                             >
                                 Submit Argument
                             </button>
