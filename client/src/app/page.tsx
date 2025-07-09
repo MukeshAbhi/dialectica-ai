@@ -67,7 +67,9 @@ export default function HomePage() {
         });
 
         return () => {
-            socket.disconnect();
+            socket.off("chat:message"); // not disconnecting global socket, instead removing specific listener
+            // can  emit "debate:leave" here
+            //socket.emit("debate:leave");
         };
     }, [currentUser]);
 
