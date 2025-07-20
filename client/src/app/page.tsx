@@ -23,7 +23,7 @@ const ChatPage: React.FC = () => {
     }
     return (
         <div className="max-w-xl mx-auto p-6">
-            <h2 className="text-2xl font-semibold mb-4">Debate Room Chat</h2>
+            <h2 className="text-2xl font-semibold mb-4">DebateRoom AI</h2>
             <div className="border border-gray-300 rounded-lg p-4 min-h-[300px] mb-4 bg-gray-50">
                 {messages.length === 0 ? (
                     <div className="text-gray-400">No messages yet.</div>
@@ -58,7 +58,7 @@ const ChatPage: React.FC = () => {
                     value={roomInput}
                     onChange={e => setRoomInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleJoinRoom()}
-                    placeholder="Enter a room name..." 
+                    placeholder="Enter a room name..."
                     className="flex-1 px-2 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
