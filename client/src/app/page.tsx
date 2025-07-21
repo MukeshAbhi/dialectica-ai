@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { IconHome, IconMessage, IconUsers, IconSettings, IconLogout } from "@tabler/icons-react";
 
@@ -8,6 +8,16 @@ const ChatPage: React.FC = () => {
     const [messages, setMessages] = useState<string[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [roomInput, setRoomInput] = useState("");
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     const links = [
         {
@@ -83,15 +93,18 @@ const ChatPage: React.FC = () => {
                 <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
                     <h2 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-100">DebateRoom AI</h2>
 
-                    <div className="border border-gray-300 dark:border-neutral-600 rounded-lg p-4 min-h-[300px] bg-gray-50 dark:bg-neutral-800 flex-1">
+                    <div className="border border-gray-300 dark:border-neutral-600 rounded-lg p-4 h-[400px] bg-gray-50 dark:bg-neutral-800 flex-1 overflow-y-auto">
                         {messages.length === 0 ? (
                             <div className="text-gray-400 dark:text-neutral-500">No messages yet.</div>
                         ) : (
-                            messages.map((msg, idx) => (
-                                <div key={idx} className="mb-2 text-neutral-700 dark:text-neutral-200">
-                                    {msg}
-                                </div>
-                            ))
+                            <div className="flex flex-col gap-2">
+                                {messages.map((msg, idx) => (
+                                    <div key={idx} className="p-2 bg-white dark:bg-neutral-700 rounded text-neutral-700 dark:text-neutral-200 break-words">
+                                        {msg}
+                                    </div>
+                                ))}
+                                <div ref={messagesEndRef} />
+                            </div>
                         )}
                     </div>
 
