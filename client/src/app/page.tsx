@@ -3,12 +3,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { IconHome, IconMessage, IconUsers, IconSettings, IconLogout } from "@tabler/icons-react";
+import io from "socket.io-client";
 
 const ChatPage: React.FC = () => {
     const [messages, setMessages] = useState<string[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [roomInput, setRoomInput] = useState("");
 
+    const socket = io("http://localhost:5003"); //env in production
+
+    // Reference to the end of messages for auto-scrolling
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -47,20 +51,34 @@ const ChatPage: React.FC = () => {
         },
     ];
 
+    // Functions to handle sending messages and joining rooms :
+
     const handleSend = () => {
         if (messageInput.trim()) {
-            setMessages([...messages, messageInput]);
+            socket.emit("sendMessage", { message: messageInput, room: roomInput });
+            setMessages(prev => [...prev, messageInput]);
             setMessageInput("");
-            // backend
         }
     };
 
     function handleJoinRoom(): void {
         if (roomInput.trim()) {
-            setMessages([...messages, `Joined room: ${roomInput}`]);
+            socket.emit("joinRoom", roomInput);
+            setMessages(prev => [...prev, `Joined room: ${roomInput}`]);
             setRoomInput("");
         }
     }
+
+    // listening for incoming messages :
+    useEffect(() => {
+        socket.on("message", (message: string) => {
+            setMessages(prev => [...prev, message]);
+        });
+
+        return () => {
+            socket.off("message");
+        };
+    }, [socket]);
 
     return (
         <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
