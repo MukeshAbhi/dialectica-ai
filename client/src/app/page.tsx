@@ -10,7 +10,19 @@ const ChatPage: React.FC = () => {
     const [messageInput, setMessageInput] = useState("");
     const [roomInput, setRoomInput] = useState("");
 
-    const socket = io("http://localhost:5003"); //env in production
+    const socketRef = useRef<SocketIOClient.Socket | null>(null);
+
+    //multiple connections issue workaround:
+
+    useEffect(() => {
+      socketRef.current = io("http://localhost:5003"); //env in production
+      return () => {
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+        }
+      };
+    }, []);
+
 
     // Reference to the end of messages for auto-scrolling
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,31 +66,32 @@ const ChatPage: React.FC = () => {
     // Functions to handle sending messages and joining rooms :
 
     const handleSend = () => {
-        if (messageInput.trim()) {
-            socket.emit("sendMessage", { message: messageInput, room: roomInput });
+        if (messageInput.trim() && socketRef.current) {
+            socketRef.current.emit("sendMessage", { message: messageInput, room: roomInput });
             setMessages(prev => [...prev, messageInput]);
             setMessageInput("");
         }
     };
 
     function handleJoinRoom(): void {
-        if (roomInput.trim()) {
-            socket.emit("joinRoom", roomInput);
+        if (roomInput.trim() && socketRef.current) {
+            socketRef.current.emit("joinRoom", roomInput);
             setMessages(prev => [...prev, `Joined room: ${roomInput}`]);
             setRoomInput("");
         }
     }
 
-    // listening for incoming messages :
+    // listening for incoming messages:
     useEffect(() => {
-        socket.on("message", (message: string) => {
-            setMessages(prev => [...prev, message]);
-        });
+      socketRef.current?.on("message", (message: string) => {
+          setMessages(prev => [...prev, message]);
+      });
 
-        return () => {
-            socket.off("message");
-        };
-    }, [socket]);
+      return () => {
+        socketRef.current?.off("message");
+      };
+    }, []);
+
 
     return (
         <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
