@@ -9,6 +9,7 @@ const ChatPage: React.FC = () => {
     const [messages, setMessages] = useState<string[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [roomInput, setRoomInput] = useState("");
+    const [joinedRoom, setJoinedRoom] = useState<string | null>(null);
 
     const socketRef = useRef<SocketIOClient.Socket | null>(null);
 
@@ -66,29 +67,31 @@ const ChatPage: React.FC = () => {
     // Functions to handle sending messages and joining rooms :
 
     const handleSend = () => {
-        if (messageInput.trim() && socketRef.current) {
-            socketRef.current.emit("sendMessage", { message: messageInput, room: roomInput });
-            setMessages(prev => [...prev, messageInput]);
+        if (messageInput.trim() && joinedRoom && socketRef.current) {
+            socketRef.current.emit("sendMessage", messageInput, joinedRoom);
+            //setMessages(prev => [...prev, messageInput]);
             setMessageInput("");
         }
     };
 
-    function handleJoinRoom(): void {
-        if (roomInput.trim() && socketRef.current) {
-            socketRef.current.emit("joinRoom", roomInput);
-            setMessages(prev => [...prev, `Joined room: ${roomInput}`]);
+    const handleJoinRoom = () => {
+        const roomName = roomInput.trim();
+        if (roomName && socketRef.current) {
+            socketRef.current.emit("joinRoom", roomName);
+            setJoinedRoom(roomName);
             setRoomInput("");
+            setMessages([]); // Clear
         }
     }
 
     // listening for incoming messages:
     useEffect(() => {
-      socketRef.current?.on("message", (message: string) => {
+      socketRef.current?.on("chat-message", (message: string) => {
           setMessages(prev => [...prev, message]);
       });
 
       return () => {
-        socketRef.current?.off("message");
+        socketRef.current?.off("chat-message");
       };
     }, []);
 

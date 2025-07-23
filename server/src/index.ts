@@ -24,21 +24,22 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket: Socket) => {
-    console.log('New client connected');
+    console.log(`New client connected: ${socket.id}`);
+    console.log('Rooms:', [...socket.rooms]);
 
-    socket.on('joinRoom', (room) => {
+    socket.on('joinRoom', (room: string) => {
         socket.join(room);
         console.log(`Client joined room: ${room}`);
-        socket.emit('message', `You joined room: ${room}`);
+        socket.emit('system-message', `You joined room: ${room}`);
     });
 
-    socket.on('sendMessage', (message, room) => {
-        io.to(room).emit('message', message);
+    socket.on('sendMessage', (message: string, room: string) => {
+        io.to(room).emit('chat-message', message);
         console.log(`Message sent to room ${room}: ${message}`);
     });
 
     socket.on('disconnect', () => {
-        console.log('Client disconnected');
+        console.log(`Client disconnected: ${socket.id}`);
     });
 });
 
