@@ -84,7 +84,7 @@ const ChatPage: React.FC = () => {
         }
     }
 
-    // listening for incoming messages:
+    // Chat Message Listener:
     useEffect(() => {
       socketRef.current?.on("chat-message", (message: string) => {
           setMessages(prev => [...prev, message]);
@@ -95,6 +95,16 @@ const ChatPage: React.FC = () => {
       };
     }, []);
 
+    // System Message Listener:
+    useEffect(() => {
+        const handleSystemMessage = (message: string) => {
+            setMessages(prev => [...prev, message]);
+        };
+        socketRef.current?.on("system-message", handleSystemMessage);
+        return () => {
+            socketRef.current?.off("system-message", handleSystemMessage);
+        };
+    }, []);
 
     return (
         <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">

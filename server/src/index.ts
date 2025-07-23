@@ -40,6 +40,7 @@ io.on('connection', (socket: Socket) => {
 
     socket.on('disconnect', () => {
         console.log(`Client disconnected: ${socket.id}`);
+        socket.broadcast.emit('system-message', `User ${socket.id} has disconnected`);
     });
 });
 
