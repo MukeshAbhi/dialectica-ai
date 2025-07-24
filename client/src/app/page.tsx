@@ -1,11 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import io from "socket.io-client";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const HomePage: React.FC = () => {
     const [roomName, setRoomName] = useState("");
     const router = useRouter();
+    const socketRef = useRef<SocketIOClient.Socket | null>(null);
+
+    const [isSocketConnected, setIsSocketConnected] = useState(false);
+
+    useEffect(() => {
+        socketRef.current = io("http://localhost:5003");
+
+        socketRef.current.on("connect", () => {
+            setIsSocketConnected(true);
+            console.log("Socket connected:", socketRef.current?.id);
+        });
+
+        socketRef.current.on("disconnect", () => {
+            setIsSocketConnected(false);
+            console.log("Socket disconnected");
+        });
+
+        socketRef.current.on("randomRoomFound", (roomId: string) => {
+            console.log("Random room found:", roomId);
+            router.push(`/debate/${roomId}`);
+        });
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+        };
+    }, [router]);
+
+    const handleJoinRandomRoom = () => {
+    if (!isSocketConnected) {
+      alert("Not connected to server yet, please try again...");
+      return;
+    }
+    if (socketRef.current) {
+      socketRef.current.emit("requestRandomRoom");
+    }
+  };
 
     const handleJoinRoom = () => {
         const trimmedRoomName = roomName.trim();
@@ -15,64 +55,65 @@ const HomePage: React.FC = () => {
         }
     };
 
-    const handleCreateRandomRoom = () => {
-        // Generate a random room ID
-        const randomId = Math.random().toString(36).substring(2, 8);
-        router.push(`/debate/${randomId}`);
-    };
+    // const handleCreateRandomRoom = () => {
+    //     // Generate a random room ID
+    //     const randomId = Math.random().toString(36).substring(2, 8);
+    //     router.push(`/debate/${randomId}`);
+    // };
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
-                        DebateRoom AI
-                    </h1>
-                    <p className="text-neutral-600 dark:text-neutral-400">
-                        Join or create a debate room to get started
-                    </p>
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+            <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
+                DebateRoom AI
+            </h1>
+            <p className="text-neutral-600 dark:text-neutral-400">
+                Join or create a debate room to get started
+            </p>
+            </div>
+
+            <div className="space-y-4">
+            <div>
+                <input
+                type="text"
+                value={roomName}
+                onChange={(e) => setRoomName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
+                placeholder="Enter room name..."
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+
+            <button
+                onClick={handleJoinRoom}
+                disabled={!roomName.trim()}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            >
+                Join Room
+            </button>
+
+            <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-neutral-600" />
                 </div>
-
-                <div className="space-y-4">
-                    <div>
-                        <input
-                            type="text"
-                            value={roomName}
-                            onChange={(e) => setRoomName(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleJoinRoom()}
-                            placeholder="Enter room name..."
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    <button
-                        onClick={handleJoinRoom}
-                        disabled={!roomName.trim()}
-                        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-                    >
-                        Join Room
-                    </button>
-
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300 dark:border-neutral-600" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400">
-                                Or
-                            </span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={handleCreateRandomRoom}
-                        className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                    >
-                        Create Random Room
-                    </button>
+                <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400">
+                    Or
+                </span>
                 </div>
             </div>
+
+            <button
+                onClick={handleJoinRandomRoom}
+                disabled={!isSocketConnected}
+                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            >
+                Join Random Available Room
+            </button>
+            </div>
         </div>
+    </div>
     );
 };
 

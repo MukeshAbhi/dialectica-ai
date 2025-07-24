@@ -35,7 +35,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     }, [roomId]);
 
 
-    // Reference to the end of messages for auto-scrolling
+    // Reference to the end of messages for auto-scrolling:
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
