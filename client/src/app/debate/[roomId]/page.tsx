@@ -8,14 +8,25 @@ import io from "socket.io-client";
 
 interface ChatPageProps {}
 
+// added this for the structure of messages
+interface ChatMessage {
+    user: string;
+    content: string;
+    sender: string;
+    timestamp: number;
+    type: "chat" | "system";
+    role?: "pro" | "con";
+}
+
 const ChatPage: React.FC<ChatPageProps> = () => {
     const params = useParams();
     const router = useRouter();
     const roomId = params.roomId as string;
 
-    const [messages, setMessages] = useState<string[]>([]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [messageInput, setMessageInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string>("");
 
     const socketRef = useRef<SocketIOClient.Socket | null>(null);
 
@@ -23,11 +34,50 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     useEffect(() => {
         if (roomId) {
             socketRef.current = io("http://localhost:5003"); // env in production
+
+            // uhh this is for the socketid so I can position the messages correctly
+            socketRef.current.on("connect", () => {
+                setCurrentUserId(socketRef.current?.id || "");
+            });
+
+            // event listeners, Chat and System messages ===>
+            const chatHandler = (msg: { sender: string; content: string; timestamp: number; role?: string }) => {
+                setMessages(prev => [
+                    ...prev,
+                    {
+                        user: msg.sender,
+                        sender: msg.sender,
+                        content: msg.content,
+                        timestamp: msg.timestamp || Date.now(),
+                        type: "chat" as const,
+                        role: msg.role as "pro" | "con" | undefined,
+                    }
+                ]);
+            };
+
+            const systemHandler = (msg: string) => {
+                setMessages(prev => [
+                    ...prev,
+                    {
+                        user: "system",
+                        sender: "system",
+                        content: msg,
+                        timestamp: Date.now(),
+                        type: "system",
+                    },
+                ]);
+            };
+
+            socketRef.current.on("chat-message", chatHandler);
+            socketRef.current.on("system-message", systemHandler);
+
             socketRef.current.emit("joinRoom", roomId);
             setIsConnected(true);
 
             return () => {
                 if (socketRef.current) {
+                    socketRef.current.off("chat-message", chatHandler);
+                    socketRef.current.off("system-message", systemHandler);
                     socketRef.current.disconnect();
                 }
             };
@@ -86,28 +136,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         router.push("/");
     };
 
-    // Chat Message Listener:
-    useEffect(() => {
-      socketRef.current?.on("chat-message", (message: string) => {
-          setMessages(prev => [...prev, message]);
-      });
-
-      return () => {
-        socketRef.current?.off("chat-message");
-      };
-    }, []);
-
-    // System Message Listener:
-    useEffect(() => {
-        const handleSystemMessage = (message: string) => {
-            setMessages(prev => [...prev, message]);
-        };
-        socketRef.current?.on("system-message", handleSystemMessage);
-        return () => {
-            socketRef.current?.off("system-message", handleSystemMessage);
-        };
-    }, []);
-
     return (
         <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
             <Sidebar>
@@ -135,56 +163,103 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                 </SidebarBody>
             </Sidebar>
 
+
+            {/* Main Chat Area UI which is better now */}
+            
             <div className="flex flex-1">
                 <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
                         <div>
-                            <h2 className="text-2xl font-semibold text-neutral-800 dark:text-neutral-100">DebateRoom AI</h2>
-                            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                                Room: <span className="font-mono font-medium">{roomId}</span>
-                                {isConnected ? (
-                                    <span className="ml-2 text-green-600 dark:text-green-400">● Connected</span>
-                                ) : (
-                                    <span className="ml-2 text-red-600 dark:text-red-400">● Disconnected</span>
-                                )}
-                            </p>
+                            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">DebateRoom AI</h2>
+                            <div className="flex items-center gap-4 mt-2">
+                                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                                    Room: <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">{roomId}</span>
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <span className={`text-xs font-medium ${isConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                        {isConnected ? 'Connected' : 'Disconnected'}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <button
                             onClick={handleLeaveRoom}
-                            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+                            className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
                         >
                             Leave Room
                         </button>
                     </div>
 
-                    <div className="border border-gray-300 dark:border-neutral-600 rounded-lg p-4 h-[400px] bg-gray-50 dark:bg-neutral-800 flex-1 overflow-y-auto">
+                    <div className="border border-gray-200 dark:border-neutral-700 rounded-xl p-6 h-[480px] bg-white dark:bg-neutral-800 flex-1 overflow-y-auto">
                         {messages.length === 0 ? (
-                            <div className="text-gray-400 dark:text-neutral-500">No messages yet.</div>
-                        ) : (
-                            <div className="flex flex-col gap-2">
-                                {messages.map((msg, idx) => (
-                                    <div key={idx} className="p-2 bg-white dark:bg-neutral-700 rounded text-neutral-700 dark:text-neutral-200 break-words">
-                                        {msg}
+                            <div className="h-full flex items-center justify-center">
+                                <div className="text-center">
+                                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-neutral-700 rounded-full flex items-center justify-center">
+                                        <IconMessage className="w-8 h-8 text-gray-400" />
                                     </div>
-                                ))}
+                                    <p className="text-gray-500 dark:text-neutral-400 text-lg font-medium">No messages yet</p>
+                                    <p className="text-gray-400 dark:text-neutral-500 text-sm mt-1">Start the conversation!</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-4">
+                                {messages.map((msg, idx) => {
+                                    const isOwnMessage = msg.sender === currentUserId;
+                                    return (
+                                        <div key={idx} className={`${msg.type === "system" ? "text-center" : ""}`}>
+                                            {msg.type === "system" ? (
+                                                <div className="flex justify-center">
+                                                    <div className="px-4 py-2 bg-blue-100 dark:bg-blue-600/5 rounded-full text-sm text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                                        {msg.content}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className={`flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
+                                                    <div className={`w-10 h-10 ${isOwnMessage ? 'bg-green-500' : 'bg-blue-500'} rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0`}>
+                                                        {msg.user.substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                    <div className={`flex-1 min-w-0 max-w-[75%] ${isOwnMessage ? 'text-right' : ''}`}>
+                                                        <div className={`flex items-center gap-2 mb-1 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
+                                                            <span className={`text-sm font-semibold ${msg.role === "pro" ? "text-blue-600" : msg.role === "con" ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}>
+                                                                {isOwnMessage ? 'You' : (msg.user.length > 15 ? msg.user.substring(0, 15) + "..." : msg.user)}
+                                                            </span>
+                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                {new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* bruh */}
+
+                                                        <div className={`${isOwnMessage ? 'bg-gray-200 dark:bg-neutral-600 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm' : 'bg-gray-50 dark:bg-neutral-700 rounded-2xl rounded-tl-sm'} px-4 py-3 border ${isOwnMessage ? 'border-gray-300 dark:border-neutral-500' : 'border-gray-200 dark:border-neutral-600'}`}>
+                                                            <span className={`${isOwnMessage ? 'text-gray-900 dark:text-gray-100' : 'text-gray-900 dark:text-gray-100'} leading-relaxed`}>
+                                                                {msg.content}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                                 <div ref={messagesEndRef} />
                             </div>
                         )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-neutral-700">
                         <input
                             type="text"
                             value={messageInput}
                             onChange={e => setMessageInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleSend()}
                             placeholder="Type your message..."
-                            className="flex-1 px-3 py-2 rounded border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                         <button
                             onClick={handleSend}
-                            disabled={!isConnected}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                            disabled={!isConnected || !messageInput.trim()}
+                            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-medium transition-colors disabled:cursor-not-allowed"
                         >
                             Send
                         </button>

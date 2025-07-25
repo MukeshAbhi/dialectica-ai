@@ -44,7 +44,9 @@ io.on('connection', (socket: Socket) => {
             if (participants.has(socket.id)) {
                 participants.delete(socket.id);
                 socket.leave(roomId);
-                socket.broadcast.to(roomId).emit('system-message', `User ${socket.id} has left the room`);
+                socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
+
+                // ok so removed the socket.ids for privacy and security
 
                 // Clean up empty rooms
                 if (participants.size === 0) {
@@ -79,7 +81,11 @@ io.on('connection', (socket: Socket) => {
 
         socket.emit('randomRoomFound', availableRoomId);
 
-        socket.broadcast.to(availableRoomId).emit('system-message', `User ${socket.id} has joined the room`);
+       // added this to omit the first user join message because it was pointless
+        // Only notify others if there are other users in the room
+        if (rooms[availableRoomId].size > 1) {
+            socket.broadcast.to(availableRoomId).emit('system-message', `A user has joined the room`);
+        }
     });
 
     socket.on('joinRoom', (room: string) => {
@@ -88,7 +94,7 @@ io.on('connection', (socket: Socket) => {
             if (participants.has(socket.id)) {
                 participants.delete(socket.id);
                 socket.leave(roomId);
-                socket.broadcast.to(roomId).emit('system-message', `User ${socket.id} has left the room`);
+                socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
 
                 if (participants.size === 0) {
                     delete rooms[roomId];
@@ -114,12 +120,22 @@ io.on('connection', (socket: Socket) => {
         rooms[room].add(socket.id);
         console.log(`Client ${socket.id} joined room: ${room} (${rooms[room].size}/${MAX_ROOM_CAPACITY})`);
 
+        // Send welcome message to the user who joined
         socket.emit('system-message', `You joined room: ${room}`);
-        socket.broadcast.to(room).emit('system-message', `User ${socket.id} has joined the room`);
+
+        // Notify other users in the room (but not the user who just joined)
+        socket.broadcast.to(room).emit('system-message', `A user has joined the room`);
     });
 
+    // sendMessage event ===>
     socket.on('sendMessage', (message: string, room: string) => {
-        io.to(room).emit('chat-message', message);
+        const messageData = {
+            sender: socket.id,
+            content: message,
+            timestamp: Date.now(),
+            role: undefined // later for pro/con roles
+        };
+        io.to(room).emit('chat-message', messageData);
         console.log(`Message sent to room ${room}: ${message}`);
     });
 
@@ -133,7 +149,7 @@ io.on('connection', (socket: Socket) => {
                 console.log(`Removed user ${socket.id} from room ${roomId}`);
 
                 // Notify remaining users in the room
-                socket.broadcast.to(roomId).emit('system-message', `User ${socket.id} has left the room`);
+                socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
 
                 // Clean up empty rooms
                 if (participants.size === 0) {
