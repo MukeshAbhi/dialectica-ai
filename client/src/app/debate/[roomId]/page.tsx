@@ -103,11 +103,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
             icon: <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
         },
         {
-            label: "Debates",
-            href: "/debate",
-            icon: <IconMessage className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-        },
-        {
             label: "Rooms",
             href: "/rooms",
             icon: <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
@@ -165,7 +160,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 
 
             {/* Main Chat Area UI which is better now */}
-            
+
             <div className="flex flex-1">
                 <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
                     <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
