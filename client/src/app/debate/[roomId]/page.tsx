@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { IconHome, IconMessage, IconUsers, IconSettings, IconLogout } from "@tabler/icons-react";
-import io from "socket.io-client";
+import { getSocket } from "@/lib/socket";
 
 interface ChatPageProps {}
 
@@ -27,18 +27,22 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     const [messageInput, setMessageInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string>("");
+    // State to track, to prevent duplicate welcome messages.
+    const [hasAddedWelcomeMessage, setHasAddedWelcomeMessage] = useState(false);
+
 
     const socketRef = useRef<SocketIOClient.Socket | null>(null);
 
     // Join room on mount:
     useEffect(() => {
         if (roomId) {
-            socketRef.current = io("http://localhost:5003"); // env in production
+            socketRef.current = getSocket();
 
-            // uhh this is for the socketid so I can position the messages correctly
-            socketRef.current.on("connect", () => {
-                setCurrentUserId(socketRef.current?.id || "");
-            });
+            // Check if already connected
+            if (socketRef.current.connected) {
+                setCurrentUserId(socketRef.current.id || "");
+                setIsConnected(true);
+            }
 
             // event listeners, Chat and System messages ===>
             const chatHandler = (msg: { sender: string; content: string; timestamp: number; role?: string }) => {
@@ -71,14 +75,51 @@ const ChatPage: React.FC<ChatPageProps> = () => {
             socketRef.current.on("chat-message", chatHandler);
             socketRef.current.on("system-message", systemHandler);
 
-            socketRef.current.emit("joinRoom", roomId);
-            setIsConnected(true);
+
+            // changed joinRoom logic to handle random room users [works for now]
+
+            socketRef.current.on("connect", () => {
+                setIsConnected(true);
+                setCurrentUserId(socketRef.current?.id || "");
+            });
+
+            socketRef.current.on("disconnect", () => {
+                setIsConnected(false);
+            });
+
+            // Check if user came from random room (already joined via requestRandomRoom)
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromRandom = urlParams.get('fromRandom');
+
+            if (fromRandom && !hasAddedWelcomeMessage) {
+                // For random room users, send a welcome message since they're already in the room
+                setMessages(prev => [
+                    ...prev,
+                    {
+                        user: "system",
+                        sender: "system",
+                        content: `You joined room: ${roomId}`,
+                        timestamp: Date.now(),
+                        type: "system",
+                    },
+                ]);
+
+                setHasAddedWelcomeMessage(true);
+
+                // Clear the URL parameter to prevent duplicate messages on re-render (idk if it really does help solve the issue. but works for now)
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            } else if (!fromRandom) {
+                // calling joinRoom if NOT coming from random room
+                socketRef.current.emit("joinRoom", roomId);
+            }
 
             return () => {
                 if (socketRef.current) {
                     socketRef.current.off("chat-message", chatHandler);
                     socketRef.current.off("system-message", systemHandler);
-                    socketRef.current.disconnect();
+                    socketRef.current.off("connect");
+                    socketRef.current.off("disconnect");
                 }
             };
         }
