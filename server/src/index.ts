@@ -80,7 +80,6 @@ io.on('connection', (socket: Socket) => {
         console.log(`User ${socket.id} joined room: ${availableRoomId} (${rooms[availableRoomId].size}/${MAX_ROOM_CAPACITY})`);
 
         socket.emit('randomRoomFound', availableRoomId);
-
        // added this to omit the first user join message because it was pointless
         // Only notify others if there are other users in the room
         if (rooms[availableRoomId].size > 1) {
@@ -89,6 +88,16 @@ io.on('connection', (socket: Socket) => {
     });
 
     socket.on('joinRoom', (room: string) => {
+
+        console.log(`User ${socket.id} requested to join room: ${room}`);
+        console.log(`Current user rooms before join:`, Object.entries(rooms).filter(([_, participants]) => participants.has(socket.id)).map(([roomId]) => roomId));
+
+        // check is user is already in target room:
+        if (rooms[room] && rooms[room].has(socket.id)) {
+            console.log(`User ${socket.id} is already in room: ${room} - ignoring duplicate join`);
+            return;
+        }
+
         // Remove user from any existing rooms first /// important for room management ///// AAAAAAAAA
         for (const [roomId, participants] of Object.entries(rooms)) {
             if (participants.has(socket.id)) {
@@ -123,8 +132,10 @@ io.on('connection', (socket: Socket) => {
         // Send welcome message to the user who joined
         socket.emit('system-message', `You joined room: ${room}`);
 
-        // Notify other users in the room (but not the user who just joined)
-        socket.broadcast.to(room).emit('system-message', `A user has joined the room`);
+        // Only notify others if there are other users in the room (consistent with requestRandomRoom)
+        if (rooms[room].size > 1) {
+            socket.broadcast.to(room).emit('system-message', `A user has joined the room`);
+        }
     });
 
     // sendMessage event ===>
