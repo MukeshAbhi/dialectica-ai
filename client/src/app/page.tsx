@@ -1,9 +1,9 @@
 "use client";
 
-import io from "socket.io-client";
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { getSocket } from "@/lib/socket";
 
 const HomePage: React.FC = () => {
     const [roomName, setRoomName] = useState("");
@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
     const [isSocketConnected, setIsSocketConnected] = useState(false);
 
     useEffect(() => {
-        socketRef.current = io("http://localhost:5003");
+        socketRef.current = getSocket();
 
         socketRef.current.on("connect", () => {
             setIsSocketConnected(true);
@@ -27,12 +27,20 @@ const HomePage: React.FC = () => {
 
         socketRef.current.on("randomRoomFound", (roomId: string) => {
             console.log("Random room found:", roomId);
-            router.push(`/debate/${roomId}`);
+
+            router.push(`/debate/${roomId}?fromRandom=true`); // adding a query parameter to indicate the room was joined randomly.
         });
+
+        // Check if already connected
+        if (socketRef.current.connected) {
+            setIsSocketConnected(true);
+        }
 
         return () => {
             if (socketRef.current) {
-                socketRef.current.disconnect();
+                socketRef.current.off("connect");
+                socketRef.current.off("disconnect");
+                socketRef.current.off("randomRoomFound");
             }
         };
     }, [router]);
