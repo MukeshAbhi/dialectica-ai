@@ -86,6 +86,22 @@ io.on('connection', (socket: Socket) => {
             socket.broadcast.to(availableRoomId).emit('system-message', `A user has joined the room`);
         }
     });
+    
+    // this is the room availability check so no one randomly can send msgs or join rooms.
+    socket.on('checkRoomAvailability', (room: string) => {
+        console.log(`User ${socket.id} checking availability for room: ${room}`);
+
+        const roomExists = rooms[room] && rooms[room].size > 0;
+        const isFull = roomExists && rooms[room].size >= MAX_ROOM_CAPACITY;
+
+        socket.emit('roomAvailabilityResponse', {
+            roomId: room,
+            exists: roomExists,
+            isFull: isFull,
+            currentUsers: roomExists ? rooms[room].size : 0,
+            maxUsers: MAX_ROOM_CAPACITY
+        });
+    });
 
     socket.on('joinRoom', (room: string) => {
 
