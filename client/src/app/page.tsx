@@ -31,6 +31,34 @@ const HomePage: React.FC = () => {
             router.push(`/debate/${roomId}?fromRandom=true`); // adding a query parameter to indicate the room was joined randomly.
         });
 
+        // room availability response [WORKS FOR NOW - but needs to be improved]
+        socketRef.current.on("roomAvailabilityResponse", (response: {
+            roomId: string;
+            exists: boolean;
+            isFull: boolean;
+            currentUsers: number;
+            maxUsers: number;
+        }) => {
+            console.log("Room availability response:", response);
+
+            if (response.exists && response.isFull) {
+                alert(`Room "${response.roomId}" is full (${response.currentUsers}/${response.maxUsers} users). Please try another room.`);
+                return;
+            }
+
+            if (response.exists) {
+                const confirmJoin = confirm(`Room "${response.roomId}" already exists with ${response.currentUsers} user(s). Do you want to join it?`);
+                if (!confirmJoin) {
+                    return;
+                }
+            }
+
+            // Navigate to the room
+            router.push(`/debate/${encodeURIComponent(response.roomId)}`);
+        });
+
+        // Handle socket connection errors [PENDING]
+
         // Check if already connected
         if (socketRef.current.connected) {
             setIsSocketConnected(true);
@@ -41,6 +69,7 @@ const HomePage: React.FC = () => {
                 socketRef.current.off("connect");
                 socketRef.current.off("disconnect");
                 socketRef.current.off("randomRoomFound");
+                socketRef.current.off("roomAvailabilityResponse");
             }
         };
     }, [router]);
@@ -57,9 +86,16 @@ const HomePage: React.FC = () => {
 
     const handleJoinRoom = () => {
         const trimmedRoomName = roomName.trim();
-        if (trimmedRoomName) {
-            // Navigate to the debate room
-            router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+
+        // if (trimmedRoomName) {
+                // Navigate to the debate room
+            // router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+        // }
+        if (trimmedRoomName && socketRef.current && isSocketConnected) {
+            // Check room availability first
+            socketRef.current.emit("checkRoomAvailability", trimmedRoomName);
+        } else if (!isSocketConnected) {
+            alert("Not connected to server yet, please try again...");
         }
     };
 
