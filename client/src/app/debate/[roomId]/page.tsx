@@ -8,6 +8,7 @@ import { getSocket } from "@/lib/socket";
 
 interface ChatPageProps {}
 
+// added this for the structure of messages
 interface ChatMessage {
     user: string;
     content: string;
@@ -26,6 +27,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     const [messageInput, setMessageInput] = useState("");
     const [isConnected, setIsConnected] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string>("");
+    // State to track, to prevent duplicate welcome messages.
     const [hasAddedWelcomeMessage, setHasAddedWelcomeMessage] = useState(false);
 
 
