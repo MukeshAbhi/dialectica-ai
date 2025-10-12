@@ -6,7 +6,7 @@
 
 [![GitHub Stars](https://img.shields.io/github/stars/Condition00/debateroom-ai?style=social)](https://github.com/Condition00/debateroom-ai/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/Condition00/debateroom-ai?style=social)](https://github.com/Condition00/debateroom-ai/network/members)
-[![Discord](https://img.shields.io/discord/1243522129697624096?label=Discord&logo=discord&style=social)](https://discord.gg/sYGyBHu5SU)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/sYGyBHu5SU)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
