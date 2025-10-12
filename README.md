@@ -3,10 +3,10 @@
 </p>
 
 <div align="center">
-[![GitHub Stars](https://img.shields.io/github/stars/Dialectica-ai/dialectica-ai?style=social)](https://github.com/Dialectica-ai/dialectica-ai/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/Dialectica-ai/dialectica-ai?style=social)](https://github.com/Dialectica-ai/dialectica-ai/network/members)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+[![GitHub Stars](https://img.shields.io/github/stars/Condition00/debateroom-ai?style=social)](https://github.com/Condition00/debateroom-ai/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Condition00/debateroom-ai?style=social)](https://github.com/Condition00/debateroom-ai/network/members)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
 
