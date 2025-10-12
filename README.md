@@ -183,10 +183,9 @@ The application uses Prisma ORM with the following main models:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
-
-- 📧 Email: [your-email@domain.com]
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/dialectica-ai/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/dialectica-ai/discussions)
+- 👾 Discord: 
+- 🐛 Issues: [GitHub Issues](https://github.com/Dialectica-ai/dialectica-ai/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/Dialectica-ai/dialectica-ai/discussions)
 
 ## Acknowledgments
 
@@ -198,4 +197,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ Star this repository if you find it useful!
+
 
