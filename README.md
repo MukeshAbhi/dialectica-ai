@@ -49,7 +49,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/dialectica-ai.git
+   git clone https://github.com/Dialectica-ai/dialectica-ai
    cd dialectica-ai
    ```
 
@@ -198,3 +198,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ Star this repository if you find it useful!
+
