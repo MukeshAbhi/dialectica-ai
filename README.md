@@ -32,7 +32,7 @@ A real-time debate platform that enables structured conversations between partic
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL database
 - npm/yarn/pnpm
 
@@ -49,7 +49,7 @@ A real-time debate platform that enables structured conversations between partic
    # Install server dependencies
    cd server
    npm install
-   
+
    # Install client dependencies
    cd ../client
    npm install
@@ -60,19 +60,19 @@ A real-time debate platform that enables structured conversations between partic
    cd server
    # Set up your DATABASE_URL in .env file
    echo "DATABASE_URL=postgresql://username:password@localhost:5432/dialectica_ai" > .env
-   
+
    # Run database migrations
    npx prisma migrate dev
    ```
 
 4. **Start the development servers**
-   
+
    **Terminal 1 - Backend:**
    ```bash
    cd server
    npm run dev
    ```
-   
+
    **Terminal 2 - Frontend:**
    ```bash
    cd client

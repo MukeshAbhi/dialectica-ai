@@ -9,7 +9,13 @@
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts"
     },
-    "keywords": ["debate", "real-time", "chat", "websocket", "discussion"],
+    "keywords": [
+        "debate",
+        "real-time",
+        "chat",
+        "websocket",
+        "discussion"
+    ],
     "author": "Your Name <your.email@domain.com>",
     "license": "MIT",
     "dependencies": {

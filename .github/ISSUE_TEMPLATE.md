@@ -67,7 +67,7 @@ Please delete options that are not relevant.
 Please describe the tests that you ran to verify your changes.
 
 - [ ] Unit tests
-- [ ] Integration tests  
+- [ ] Integration tests
 - [ ] Manual testing
 
 **Test Configuration:**

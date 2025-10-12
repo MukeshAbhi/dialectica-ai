@@ -53,7 +53,7 @@ We prefer all communications to be in English.
 When contributing to Dialectica AI, please keep security in mind:
 
 1. **Input Validation**: Always validate and sanitize user inputs
-2. **Authentication**: Properly handle authentication tokens and sessions  
+2. **Authentication**: Properly handle authentication tokens and sessions
 3. **SQL Injection**: Use Prisma ORM parameterized queries
 4. **XSS Prevention**: Sanitize data before rendering in the frontend
 5. **Dependency Security**: Keep dependencies updated and audit regularly

@@ -1,56 +1,56 @@
 {
-  "name": "dialectica-ai",
-  "version": "1.0.0",
-  "description": "A real-time debate platform enabling structured conversations between participants in dedicated rooms",
-  "main": "server/dist/index.js",
-  "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "build": "npm run build:server && npm run build:client",
-    "build:server": "cd server && npm run build",
-    "build:client": "cd client && npm run build",
-    "start": "npm run start:server",
-    "start:server": "cd server && npm start",
-    "start:client": "cd client && npm start",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "clean": "rm -rf node_modules server/node_modules client/node_modules server/dist client/.next",
-    "lint": "cd client && npm run lint",
-    "db:migrate": "cd server && npx prisma migrate dev",
-    "db:generate": "cd server && npx prisma generate",
-    "db:studio": "cd server && npx prisma studio"
-  },
-  "keywords": [
-    "debate",
-    "real-time",
-    "chat",
-    "websocket",
-    "discussion",
-    "nextjs",
-    "nodejs",
-    "typescript",
-    "socket.io",
-    "prisma"
-  ],
-  "author": "Your Name <your.email@domain.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/dialectica-ai.git"
-  },
-  "bugs": {
-    "url": "https://github.com/yourusername/dialectica-ai/issues"
-  },
-  "homepage": "https://github.com/yourusername/dialectica-ai#readme",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "workspaces": [
-    "client",
-    "server"
-  ],
-  "devDependencies": {
-    "concurrently": "^7.6.0"
-  }
+    "name": "dialectica-ai",
+    "version": "1.0.0",
+    "description": "A real-time debate platform enabling structured conversations between participants in dedicated rooms",
+    "main": "server/dist/index.js",
+    "scripts": {
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+        "dev:server": "cd server && npm run dev",
+        "dev:client": "cd client && npm run dev",
+        "build": "npm run build:server && npm run build:client",
+        "build:server": "cd server && npm run build",
+        "build:client": "cd client && npm run build",
+        "start": "npm run start:server",
+        "start:server": "cd server && npm start",
+        "start:client": "cd client && npm start",
+        "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+        "clean": "rm -rf node_modules server/node_modules client/node_modules server/dist client/.next",
+        "lint": "cd client && npm run lint",
+        "db:migrate": "cd server && npx prisma migrate dev",
+        "db:generate": "cd server && npx prisma generate",
+        "db:studio": "cd server && npx prisma studio"
+    },
+    "keywords": [
+        "debate",
+        "real-time",
+        "chat",
+        "websocket",
+        "discussion",
+        "nextjs",
+        "nodejs",
+        "typescript",
+        "socket.io",
+        "prisma"
+    ],
+    "author": "Your Name <your.email@domain.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/dialectica-ai.git"
+    },
+    "bugs": {
+        "url": "https://github.com/yourusername/dialectica-ai/issues"
+    },
+    "homepage": "https://github.com/yourusername/dialectica-ai#readme",
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=8.0.0"
+    },
+    "workspaces": [
+        "client",
+        "server"
+    ],
+    "devDependencies": {
+        "concurrently": "^7.6.0"
+    }
 }
