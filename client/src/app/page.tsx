@@ -110,7 +110,7 @@ const HomePage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
             <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
-                DebateRoom AI
+                Dialectica AI
             </h1>
             <p className="text-neutral-600 dark:text-neutral-400">
                 Join or create a debate room to get started

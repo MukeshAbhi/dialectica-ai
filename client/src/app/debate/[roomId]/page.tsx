@@ -206,7 +206,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                 <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
                     <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
                         <div>
-                            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">DebateRoom AI</h2>
+                            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Dialectica AI</h2>
                             <div className="flex items-center gap-4 mt-2">
                                 <p className="text-sm text-neutral-600 dark:text-neutral-400">
                                     Room: <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">{roomId}</span>

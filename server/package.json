@@ -1,17 +1,17 @@
 {
-    "name": "server",
+    "name": "dialectica-ai-server",
     "version": "1.0.0",
-    "main": "index.js",
+    "description": "Backend server for Dialectica AI - A real-time debate platform",
+    "main": "dist/index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc --build",
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "description": "",
+    "keywords": ["debate", "real-time", "chat", "websocket", "discussion"],
+    "author": "Your Name <your.email@domain.com>",
+    "license": "MIT",
     "dependencies": {
         "@prisma/client": "^6.12.0",
         "cors": "^2.8.5",

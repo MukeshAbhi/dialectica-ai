@@ -1,6 +1,7 @@
 {
-    "name": "client",
-    "version": "0.1.0",
+    "name": "dialectica-ai-client",
+    "version": "1.0.0",
+    "description": "Frontend client for Dialectica AI - A real-time debate platform",
     "private": true,
     "scripts": {
         "dev": "next dev -p 3001",
