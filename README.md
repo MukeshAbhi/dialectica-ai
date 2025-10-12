@@ -1,4 +1,7 @@
-# Dialectica AI
+<p align="center">
+    <img src="./dialecticabanner.png" alt="Dialectica Debate Room Banner" />
+</p>
+
 
 A real-time debate platform that enables structured conversations between participants in dedicated rooms. Built with modern web technologies for seamless, interactive discussions.
 
