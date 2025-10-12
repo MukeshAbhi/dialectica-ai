@@ -2,8 +2,12 @@
     <img src="./dialecticabanner.png" alt="Dialectica Debate Room Banner" />
 </p>
 
+<div align="center">
 
-A real-time debate platform that enables structured conversations between participants in dedicated rooms. Built with modern web technologies for seamless, interactive discussions.
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+
+</div>
 
 ## Features
 
