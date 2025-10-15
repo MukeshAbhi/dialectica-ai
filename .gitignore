@@ -19,6 +19,9 @@ pnpm-debug.log*
 dist/
 build/
 out/
+server/dist/
+client/.next/
+client/out/
 
 # Runtime data
 pids
