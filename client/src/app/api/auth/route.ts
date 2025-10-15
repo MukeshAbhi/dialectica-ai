@@ -1,17 +1,24 @@
 // src/app/api/auth/route.ts
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import { NextAuthOptions } from "next-auth";
+import { auth } from '@clerk/nextjs/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export const authOptions: NextAuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
-  secret: process.env.NEXTAUTH_SECRET,
-};
+export async function GET(request: NextRequest) {
+  const { userId } = await auth()
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  return NextResponse.json({ userId }, { status: 200 })
+}
+
+export async function POST(request: NextRequest) {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Handle any auth-related POST requests here
+  return NextResponse.json({ message: 'Success', userId }, { status: 200 })
+}

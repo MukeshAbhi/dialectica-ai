@@ -49,7 +49,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/dialectica-ai.git
+   git clone https://github.com/Dialectica-ai/dialectica-ai
    cd dialectica-ai
    ```
 
@@ -183,10 +183,9 @@ The application uses Prisma ORM with the following main models:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
-
-- 📧 Email: [your-email@domain.com]
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/dialectica-ai/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/dialectica-ai/discussions)
+- 👾 Discord: [Discord](https://discord.com/invite/sYGyBHu5SU)
+- 🐛 Issues: [GitHub Issues](https://github.com/Dialectica-ai/dialectica-ai/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/Dialectica-ai/dialectica-ai/discussions)
 
 ## Acknowledgments
 
@@ -198,3 +197,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ Star this repository if you find it useful!
+
+
+
