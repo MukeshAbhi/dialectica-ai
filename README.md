@@ -128,15 +128,30 @@ DATABASE_URL=postgresql://username:password@localhost:5432/dialectica_ai
 PORT=5003
 ```
 
-### Client (.env.local)
+### Client (.env)
 ```env
-NEXTAUTH_URL=http://localhost:3001
-NEXTAUTH_SECRET=your-secret-key
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+
+# Custom Clerk Routes
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/auth/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/auth/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:5003
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5003
 ```
+
+**Note for Production**: Update `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SOCKET_URL` to your deployed server URL for mobile device compatibility.
 
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+**⏰ Pull Request Review Schedule**: All pull requests will be reviewed and merged daily at 6:30 PM EST.
 
 ### Development Guidelines
 
@@ -197,6 +212,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ Star this repository if you find it useful!
-
-
-
