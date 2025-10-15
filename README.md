@@ -151,14 +151,17 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:5003
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
+**🔀 Branch Strategy**: All contributions should be made to the `develop` branch. Please ensure your pull requests target `develop` and not `main`.
+
 **⏰ Pull Request Review Schedule**: All pull requests will be reviewed and merged daily at 6:30 PM EST.
 
 ### Development Guidelines
 
-1. **Code Style**: We use TypeScript and ESLint for code quality
-2. **Commits**: Follow conventional commit format
-3. **Pull Requests**: Provide clear descriptions and test coverage
-4. **Issues**: Use provided templates for bug reports and feature requests
+1. **Branching**: Create feature branches from `develop` and submit PRs to `develop`
+2. **Code Style**: We use TypeScript and ESLint for code quality
+3. **Commits**: Follow conventional commit format
+4. **Pull Requests**: Provide clear descriptions and test coverage
+5. **Issues**: Use provided templates for bug reports and feature requests
 
 ## API Documentation
 
