@@ -131,7 +131,7 @@ const HomePage: React.FC = () => {
                         <p className="text-neutral-600 dark:text-neutral-400 mb-6">
                             Please sign in to join debates
                         </p>
-                        <SignInButton mode="redirect" redirectUrl="/auth/sign-in">
+                        <SignInButton mode="redirect">
                             <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                                 Sign In to Continue
                             </button>
