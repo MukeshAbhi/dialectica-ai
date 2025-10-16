@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { AuthenticateWithRedirectCallback } from "@clerk/nextjs"
+import { useEffect } from "react";
+import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
 
 export default function SSOCallback() {
   return (
@@ -12,5 +12,5 @@ export default function SSOCallback() {
         <AuthenticateWithRedirectCallback />
       </div>
     </div>
-  )
+  );
 }

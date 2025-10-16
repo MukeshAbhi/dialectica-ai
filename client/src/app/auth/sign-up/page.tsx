@@ -1,5 +1,5 @@
-import CustomSignUp from "@/components/auth/custom-sign-up"
+import CustomSignUp from "@/components/auth/custom-sign-up";
 
 export default function SignUpPage() {
-  return <CustomSignUp />
+  return <CustomSignUp />;
 }

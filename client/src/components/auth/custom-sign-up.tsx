@@ -1,35 +1,35 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSignUp } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { useSignUp } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import Link from "next/link";
 
 export default function CustomSignUp() {
-  const { isLoaded, signUp, setActive } = useSignUp()
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [verifying, setVerifying] = useState(false)
-  const [code, setCode] = useState("")
-  const router = useRouter()
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [code, setCode] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isLoaded) return
+    e.preventDefault();
+    if (!isLoaded) return;
 
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
       await signUp.create({
@@ -37,55 +37,55 @@ export default function CustomSignUp() {
         lastName,
         emailAddress: email,
         password,
-      })
+      });
 
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
-      setVerifying(true)
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setVerifying(true);
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "An error occurred during sign up.")
+      setError(err?.errors?.[0]?.message || "An error occurred during sign up.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleVerification = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isLoaded) return
+    e.preventDefault();
+    if (!isLoaded) return;
 
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code,
-      })
+      });
 
       if (completeSignUp.status === "complete") {
-        await setActive({ session: completeSignUp.createdSessionId })
-        router.push("/")
+        await setActive({ session: completeSignUp.createdSessionId });
+        router.push("/");
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Invalid verification code.")
+      setError(err?.errors?.[0]?.message || "Invalid verification code.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignUp = async () => {
-    if (!isLoaded) return
+    if (!isLoaded) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
-      })
+      });
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "An error occurred with Google sign up.")
-      setIsLoading(false)
+      setError(err?.errors?.[0]?.message || "An error occurred with Google sign up.");
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-4">
@@ -97,8 +97,7 @@ export default function CustomSignUp() {
           <CardDescription className="text-neutral-400">
             {verifying
               ? "Enter the verification code sent to your email"
-              : "Enter your details to create your account"
-            }
+              : "Enter your details to create your account"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -143,7 +142,9 @@ export default function CustomSignUp() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-neutral-300">First name</Label>
+                    <Label htmlFor="firstName" className="text-neutral-300">
+                      First name
+                    </Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                       <Input
@@ -157,7 +158,9 @@ export default function CustomSignUp() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-neutral-300">Last name</Label>
+                    <Label htmlFor="lastName" className="text-neutral-300">
+                      Last name
+                    </Label>
                     <Input
                       id="lastName"
                       placeholder="Doe"
@@ -169,7 +172,9 @@ export default function CustomSignUp() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-neutral-300">Email</Label>
+                  <Label htmlFor="email" className="text-neutral-300">
+                    Email
+                  </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                     <Input
@@ -184,7 +189,9 @@ export default function CustomSignUp() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-neutral-300">Password</Label>
+                  <Label htmlFor="password" className="text-neutral-300">
+                    Password
+                  </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                     <Input
@@ -212,9 +219,7 @@ export default function CustomSignUp() {
                   </div>
                 </div>
 
-                {error && (
-                  <div className="text-red-400 text-sm text-center">{error}</div>
-                )}
+                {error && <div className="text-red-400 text-sm text-center">{error}</div>}
 
                 <Button
                   type="submit"
@@ -228,7 +233,9 @@ export default function CustomSignUp() {
           ) : (
             <form onSubmit={handleVerification} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="code" className="text-neutral-300">Verification code</Label>
+                <Label htmlFor="code" className="text-neutral-300">
+                  Verification code
+                </Label>
                 <Input
                   id="code"
                   placeholder="Enter 6-digit code"
@@ -240,9 +247,7 @@ export default function CustomSignUp() {
                 />
               </div>
 
-              {error && (
-                <div className="text-red-400 text-sm text-center">{error}</div>
-              )}
+              {error && <div className="text-red-400 text-sm text-center">{error}</div>}
 
               <Button
                 type="submit"
@@ -266,7 +271,10 @@ export default function CustomSignUp() {
             ) : (
               <>
                 Already have an account?{" "}
-                <Link href="/auth/sign-in" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+                <Link
+                  href="/auth/sign-in"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+                >
                   Sign in
                 </Link>
               </>
@@ -275,5 +283,5 @@ export default function CustomSignUp() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

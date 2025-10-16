@@ -10,300 +10,335 @@ interface ChatPageProps {}
 
 // added this for the structure of messages
 interface ChatMessage {
-    user: string;
-    content: string;
-    sender: string;
-    timestamp: number;
-    type: "chat" | "system";
-    role?: "pro" | "con";
+  user: string;
+  content: string;
+  sender: string;
+  timestamp: number;
+  type: "chat" | "system";
+  role?: "pro" | "con";
 }
 
 const ChatPage: React.FC<ChatPageProps> = () => {
-    const params = useParams();
-    const router = useRouter();
-    const roomId = params.roomId as string;
+  const params = useParams();
+  const router = useRouter();
+  const roomId = params.roomId as string;
 
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [messageInput, setMessageInput] = useState("");
-    const [isConnected, setIsConnected] = useState(false);
-    const [currentUserId, setCurrentUserId] = useState<string>("");
-    // State to track, to prevent duplicate welcome messages.
-    const [hasAddedWelcomeMessage, setHasAddedWelcomeMessage] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messageInput, setMessageInput] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
+  // State to track, to prevent duplicate welcome messages.
+  const [hasAddedWelcomeMessage, setHasAddedWelcomeMessage] = useState(false);
 
+  const socketRef = useRef<SocketIOClient.Socket | null>(null);
 
-    const socketRef = useRef<SocketIOClient.Socket | null>(null);
+  // Join room on mount:
+  useEffect(() => {
+    if (roomId) {
+      socketRef.current = getSocket();
 
-    // Join room on mount:
-    useEffect(() => {
-        if (roomId) {
-            socketRef.current = getSocket();
+      // Check if already connected
+      if (socketRef.current.connected) {
+        setCurrentUserId(socketRef.current.id || "");
+        setIsConnected(true);
+      }
 
-            // Check if already connected
-            if (socketRef.current.connected) {
-                setCurrentUserId(socketRef.current.id || "");
-                setIsConnected(true);
-            }
+      // event listeners, Chat and System messages ===>
+      const chatHandler = (msg: {
+        sender: string;
+        content: string;
+        timestamp: number;
+        role?: string;
+      }) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            user: msg.sender,
+            sender: msg.sender,
+            content: msg.content,
+            timestamp: msg.timestamp || Date.now(),
+            type: "chat" as const,
+            role: msg.role as "pro" | "con" | undefined,
+          },
+        ]);
+      };
 
-            // event listeners, Chat and System messages ===>
-            const chatHandler = (msg: { sender: string; content: string; timestamp: number; role?: string }) => {
-                setMessages(prev => [
-                    ...prev,
-                    {
-                        user: msg.sender,
-                        sender: msg.sender,
-                        content: msg.content,
-                        timestamp: msg.timestamp || Date.now(),
-                        type: "chat" as const,
-                        role: msg.role as "pro" | "con" | undefined,
-                    }
-                ]);
-            };
+      const systemHandler = (msg: string) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            user: "system",
+            sender: "system",
+            content: msg,
+            timestamp: Date.now(),
+            type: "system",
+          },
+        ]);
+      };
 
-            const systemHandler = (msg: string) => {
-                setMessages(prev => [
-                    ...prev,
-                    {
-                        user: "system",
-                        sender: "system",
-                        content: msg,
-                        timestamp: Date.now(),
-                        type: "system",
-                    },
-                ]);
-            };
+      socketRef.current.on("chat-message", chatHandler);
+      socketRef.current.on("system-message", systemHandler);
 
-            socketRef.current.on("chat-message", chatHandler);
-            socketRef.current.on("system-message", systemHandler);
+      // changed joinRoom logic to handle random room users [works for now]
 
+      socketRef.current.on("connect", () => {
+        setIsConnected(true);
+        setCurrentUserId(socketRef.current?.id || "");
+      });
 
-            // changed joinRoom logic to handle random room users [works for now]
+      socketRef.current.on("disconnect", () => {
+        setIsConnected(false);
+      });
 
-            socketRef.current.on("connect", () => {
-                setIsConnected(true);
-                setCurrentUserId(socketRef.current?.id || "");
-            });
+      // Check if user came from random room (already joined via requestRandomRoom)
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromRandom = urlParams.get("fromRandom");
 
-            socketRef.current.on("disconnect", () => {
-                setIsConnected(false);
-            });
+      if (fromRandom && !hasAddedWelcomeMessage) {
+        // For random room users, send a welcome message since they're already in the room
+        setMessages((prev) => [
+          ...prev,
+          {
+            user: "system",
+            sender: "system",
+            content: `You joined room: ${roomId}`,
+            timestamp: Date.now(),
+            type: "system",
+          },
+        ]);
 
-            // Check if user came from random room (already joined via requestRandomRoom)
-            const urlParams = new URLSearchParams(window.location.search);
-            const fromRandom = urlParams.get('fromRandom');
+        setHasAddedWelcomeMessage(true);
 
-            if (fromRandom && !hasAddedWelcomeMessage) {
-                // For random room users, send a welcome message since they're already in the room
-                setMessages(prev => [
-                    ...prev,
-                    {
-                        user: "system",
-                        sender: "system",
-                        content: `You joined room: ${roomId}`,
-                        timestamp: Date.now(),
-                        type: "system",
-                    },
-                ]);
+        // Clear the URL parameter to prevent duplicate messages on re-render (idk if it really does help solve the issue. but works for now)
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
+      } else if (!fromRandom) {
+        // calling joinRoom if NOT coming from random room
+        socketRef.current.emit("joinRoom", roomId);
+      }
 
-                setHasAddedWelcomeMessage(true);
-
-                // Clear the URL parameter to prevent duplicate messages on re-render (idk if it really does help solve the issue. but works for now)
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, '', newUrl);
-            } else if (!fromRandom) {
-                // calling joinRoom if NOT coming from random room
-                socketRef.current.emit("joinRoom", roomId);
-            }
-
-            return () => {
-                if (socketRef.current) {
-                    socketRef.current.off("chat-message", chatHandler);
-                    socketRef.current.off("system-message", systemHandler);
-                    socketRef.current.off("connect");
-                    socketRef.current.off("disconnect");
-                }
-            };
+      return () => {
+        if (socketRef.current) {
+          socketRef.current.off("chat-message", chatHandler);
+          socketRef.current.off("system-message", systemHandler);
+          socketRef.current.off("connect");
+          socketRef.current.off("disconnect");
         }
-    }, [roomId]);
+      };
+    }
+  }, [roomId]);
 
+  // Reference to the end of messages for auto-scrolling:
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Reference to the end of messages for auto-scrolling:
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+  const links = [
+    {
+      label: "Home",
+      href: "/",
+      icon: <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Rooms",
+      href: "/rooms",
+      icon: <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: (
+        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Logout",
+      href: "/logout",
+      icon: <IconLogout className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    },
+  ];
 
-    const links = [
-        {
-            label: "Home",
-            href: "/",
-            icon: <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-        },
-        {
-            label: "Rooms",
-            href: "/rooms",
-            icon: <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-        },
-        {
-            label: "Settings",
-            href: "/settings",
-            icon: <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-        },
-        {
-            label: "Logout",
-            href: "/logout",
-            icon: <IconLogout className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-        },
-    ];
+  // Functions to handle sending messages:
+  const handleSend = () => {
+    if (messageInput.trim() && roomId && socketRef.current && isConnected) {
+      socketRef.current.emit("sendMessage", messageInput, roomId);
+      setMessageInput("");
+    }
+  };
 
-    // Functions to handle sending messages:
-    const handleSend = () => {
-        if (messageInput.trim() && roomId && socketRef.current && isConnected) {
-            socketRef.current.emit("sendMessage", messageInput, roomId);
-            setMessageInput("");
-        }
-    };
+  const handleLeaveRoom = () => {
+    router.push("/");
+  };
 
-    const handleLeaveRoom = () => {
-        router.push("/");
-    };
-
-    return (
-        <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
-            <Sidebar>
-                <SidebarBody className="justify-between gap-10">
-                    <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-                        <div className="mt-8 flex flex-col gap-2">
-                            {links.map((link, idx) => (
-                                <SidebarLink key={idx} link={link} />
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <SidebarLink
-                            link={{
-                                label: "Anant Kavuru",
-                                href: "#",
-                                icon: (
-                                    <div className="h-7 w-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                                        AK
-                                    </div>
-                                ),
-                            }}
-                        />
-                    </div>
-                </SidebarBody>
-            </Sidebar>
-
-
-            {/* Main Chat Area UI which is better now */}
-
-            <div className="flex flex-1">
-                <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
-                    <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
-                        <div>
-                            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Dialectica AI</h2>
-                            <div className="flex items-center gap-4 mt-2">
-                                <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                                    Room: <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">{roomId}</span>
-                                </p>
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                    <span className={`text-xs font-medium ${isConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                        {isConnected ? 'Connected' : 'Disconnected'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleLeaveRoom}
-                            className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
-                        >
-                            Leave Room
-                        </button>
-                    </div>
-
-                    <div className="border border-gray-200 dark:border-neutral-700 rounded-xl p-6 h-[480px] bg-white dark:bg-neutral-800 flex-1 overflow-y-auto">
-                        {messages.length === 0 ? (
-                            <div className="h-full flex items-center justify-center">
-                                <div className="text-center">
-                                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-neutral-700 rounded-full flex items-center justify-center">
-                                        <IconMessage className="w-8 h-8 text-gray-400" />
-                                    </div>
-                                    <p className="text-gray-500 dark:text-neutral-400 text-lg font-medium">No messages yet</p>
-                                    <p className="text-gray-400 dark:text-neutral-500 text-sm mt-1">Start the conversation!</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col gap-4">
-                                {messages.map((msg, idx) => {
-                                    const isOwnMessage = msg.sender === currentUserId;
-                                    return (
-                                        <div key={idx} className={`${msg.type === "system" ? "text-center" : ""}`}>
-                                            {msg.type === "system" ? (
-                                                <div className="flex justify-center">
-                                                    <div className="px-4 py-2 bg-blue-100 dark:bg-blue-600/5 rounded-full text-sm text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                                        {msg.content}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className={`flex gap-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
-                                                    <div className={`w-10 h-10 ${isOwnMessage ? 'bg-green-500' : 'bg-blue-500'} rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0`}>
-                                                        {msg.user.substring(0, 2).toUpperCase()}
-                                                    </div>
-                                                    <div className={`flex-1 min-w-0 max-w-[75%] ${isOwnMessage ? 'text-right' : ''}`}>
-                                                        <div className={`flex items-center gap-2 mb-1 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
-                                                            <span className={`text-sm font-semibold ${msg.role === "pro" ? "text-blue-600" : msg.role === "con" ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}>
-                                                                {isOwnMessage ? 'You' : (msg.user.length > 15 ? msg.user.substring(0, 15) + "..." : msg.user)}
-                                                            </span>
-                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </span>
-                                                        </div>
-
-                                                        {/* bruh */}
-
-                                                        <div className={`${isOwnMessage ? 'bg-gray-200 dark:bg-neutral-600 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm' : 'bg-gray-50 dark:bg-neutral-700 rounded-2xl rounded-tl-sm'} px-4 py-3 border ${isOwnMessage ? 'border-gray-300 dark:border-neutral-500' : 'border-gray-200 dark:border-neutral-600'}`}>
-                                                            <span className={`${isOwnMessage ? 'text-gray-900 dark:text-gray-100' : 'text-gray-900 dark:text-gray-100'} leading-relaxed`}>
-                                                                {msg.content}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                                <div ref={messagesEndRef} />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-neutral-700">
-                        <input
-                            type="text"
-                            value={messageInput}
-                            onChange={e => setMessageInput(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleSend()}
-                            placeholder="Type your message..."
-                            className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                        />
-                        <button
-                            onClick={handleSend}
-                            disabled={!isConnected || !messageInput.trim()}
-                            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-medium transition-colors disabled:cursor-not-allowed"
-                        >
-                            Send
-                        </button>
-                    </div>
-                </div>
+  return (
+    <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
+      <Sidebar>
+        <SidebarBody className="justify-between gap-10">
+          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="mt-8 flex flex-col gap-2">
+              {links.map((link, idx) => (
+                <SidebarLink key={idx} link={link} />
+              ))}
             </div>
+          </div>
+          <div>
+            <SidebarLink
+              link={{
+                label: "Anant Kavuru",
+                href: "#",
+                icon: (
+                  <div className="h-7 w-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    AK
+                  </div>
+                ),
+              }}
+            />
+          </div>
+        </SidebarBody>
+      </Sidebar>
+
+      {/* Main Chat Area UI which is better now */}
+
+      <div className="flex flex-1">
+        <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
+          <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
+            <div>
+              <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+                Dialectica AI
+              </h2>
+              <div className="flex items-center gap-4 mt-2">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Room:{" "}
+                  <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
+                    {roomId}
+                  </span>
+                </p>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
+                  ></div>
+                  <span
+                    className={`text-xs font-medium ${isConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                  >
+                    {isConnected ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleLeaveRoom}
+              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+            >
+              Leave Room
+            </button>
+          </div>
+
+          <div className="border border-gray-200 dark:border-neutral-700 rounded-xl p-6 h-[480px] bg-white dark:bg-neutral-800 flex-1 overflow-y-auto">
+            {messages.length === 0 ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-neutral-700 rounded-full flex items-center justify-center">
+                    <IconMessage className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 dark:text-neutral-400 text-lg font-medium">
+                    No messages yet
+                  </p>
+                  <p className="text-gray-400 dark:text-neutral-500 text-sm mt-1">
+                    Start the conversation!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {messages.map((msg, idx) => {
+                  const isOwnMessage = msg.sender === currentUserId;
+                  return (
+                    <div key={idx} className={`${msg.type === "system" ? "text-center" : ""}`}>
+                      {msg.type === "system" ? (
+                        <div className="flex justify-center">
+                          <div className="px-4 py-2 bg-blue-100 dark:bg-blue-600/5 rounded-full text-sm text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                            {msg.content}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`flex gap-3 ${isOwnMessage ? "flex-row-reverse" : ""}`}>
+                          <div
+                            className={`w-10 h-10 ${isOwnMessage ? "bg-green-500" : "bg-blue-500"} rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0`}
+                          >
+                            {msg.user.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div
+                            className={`flex-1 min-w-0 max-w-[75%] ${isOwnMessage ? "text-right" : ""}`}
+                          >
+                            <div
+                              className={`flex items-center gap-2 mb-1 ${isOwnMessage ? "flex-row-reverse" : ""}`}
+                            >
+                              <span
+                                className={`text-sm font-semibold ${msg.role === "pro" ? "text-blue-600" : msg.role === "con" ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}
+                              >
+                                {isOwnMessage
+                                  ? "You"
+                                  : msg.user.length > 15
+                                    ? msg.user.substring(0, 15) + "..."
+                                    : msg.user}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(msg.timestamp || Date.now()).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+
+                            {/* bruh */}
+
+                            <div
+                              className={`${isOwnMessage ? "bg-gray-200 dark:bg-neutral-600 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm" : "bg-gray-50 dark:bg-neutral-700 rounded-2xl rounded-tl-sm"} px-4 py-3 border ${isOwnMessage ? "border-gray-300 dark:border-neutral-500" : "border-gray-200 dark:border-neutral-600"}`}
+                            >
+                              <span
+                                className={`${isOwnMessage ? "text-gray-900 dark:text-gray-100" : "text-gray-900 dark:text-gray-100"} leading-relaxed`}
+                              >
+                                {msg.content}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-neutral-700">
+            <input
+              type="text"
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Type your message..."
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+            <button
+              onClick={handleSend}
+              disabled={!isConnected || !messageInput.trim()}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-medium transition-colors disabled:cursor-not-allowed"
+            >
+              Send
+            </button>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default ChatPage;

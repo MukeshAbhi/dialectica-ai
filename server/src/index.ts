@@ -1,16 +1,16 @@
-import express from 'express';
-import { Server, Socket } from 'socket.io';
-import http from 'http';
-import cors from 'cors';
+import express from "express";
+import { Server, Socket } from "socket.io";
+import http from "http";
+import cors from "cors";
 
 const app = express();
 
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: {
-        origin: '*',
-        methods: ['GET', 'POST'],
-    },
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
 });
 
 const PORT = process.env.PORT || 5003;
@@ -18,9 +18,9 @@ app.use(cors());
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    console.log('working');
-    res.send('Running');
+app.get("/", (req, res) => {
+  console.log("working");
+  res.send("Running");
 });
 
 const rooms: { [roomId: string]: Set<string> } = {};
@@ -29,167 +29,183 @@ const MAX_ROOM_CAPACITY = 2;
 
 // statistics:
 const getRoomStats = () => {
-    return Object.entries(rooms).map(([roomId, participants]) =>
-        `${roomId} (${participants.size}/${MAX_ROOM_CAPACITY})`
-    ).join(', ') || 'No rooms';
+  return (
+    Object.entries(rooms)
+      .map(([roomId, participants]) => `${roomId} (${participants.size}/${MAX_ROOM_CAPACITY})`)
+      .join(", ") || "No rooms"
+  );
 };
 
-io.on('connection', (socket: Socket) => {
-    console.log(`New client connected: ${socket.id}`);
-    console.log('Current rooms:', getRoomStats());
+io.on("connection", (socket: Socket) => {
+  console.log(`New client connected: ${socket.id}`);
+  console.log("Current rooms:", getRoomStats());
 
-    socket.on('requestRandomRoom', () => {
-        // Remove user from any existing rooms first
-        for (const [roomId, participants] of Object.entries(rooms)) {
-            if (participants.has(socket.id)) {
-                participants.delete(socket.id);
-                socket.leave(roomId);
-                socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
+  socket.on("requestRandomRoom", () => {
+    // Remove user from any existing rooms first
+    for (const [roomId, participants] of Object.entries(rooms)) {
+      if (participants.has(socket.id)) {
+        participants.delete(socket.id);
+        socket.leave(roomId);
+        socket.broadcast.to(roomId).emit("system-message", `A user has left the room`);
 
-                // ok so removed the socket.ids for privacy and security
+        // ok so removed the socket.ids for privacy and security
 
-                // Clean up empty rooms
-                if (participants.size === 0) {
-                    delete rooms[roomId];
-                    console.log(`Deleted empty room: ${roomId}`);
-                }
-            }
+        // Clean up empty rooms
+        if (participants.size === 0) {
+          delete rooms[roomId];
+          console.log(`Deleted empty room: ${roomId}`);
         }
+      }
+    }
 
-        console.log(`User ${socket.id} requested to join a random room`);
+    console.log(`User ${socket.id} requested to join a random room`);
 
-        // Find available room with less than MAX_ROOM_CAPACITY users
-        let availableRoomId: string | null = null;
-        for (const [roomId, participants] of Object.entries(rooms)) {
-            if (participants.size < MAX_ROOM_CAPACITY) {
-                availableRoomId = roomId;
-                break;
-            }
-        }
+    // Find available room with less than MAX_ROOM_CAPACITY users
+    let availableRoomId: string | null = null;
+    for (const [roomId, participants] of Object.entries(rooms)) {
+      if (participants.size < MAX_ROOM_CAPACITY) {
+        availableRoomId = roomId;
+        break;
+      }
+    }
 
-        // If no available room, create a new one
-        if (!availableRoomId) {
-            availableRoomId = `room_${Math.random().toString(36).substring(2, 10)}`;
-            rooms[availableRoomId] = new Set();
-            console.log(`Created new room: ${availableRoomId}`);
-        }
+    // If no available room, create a new one
+    if (!availableRoomId) {
+      availableRoomId = `room_${Math.random().toString(36).substring(2, 10)}`;
+      rooms[availableRoomId] = new Set();
+      console.log(`Created new room: ${availableRoomId}`);
+    }
 
-        // Join socket to that room
-        socket.join(availableRoomId);
-        rooms[availableRoomId].add(socket.id);
-        console.log(`User ${socket.id} joined room: ${availableRoomId} (${rooms[availableRoomId].size}/${MAX_ROOM_CAPACITY})`);
+    // Join socket to that room
+    socket.join(availableRoomId);
+    rooms[availableRoomId].add(socket.id);
+    console.log(
+      `User ${socket.id} joined room: ${availableRoomId} (${rooms[availableRoomId].size}/${MAX_ROOM_CAPACITY})`
+    );
 
-        socket.emit('randomRoomFound', availableRoomId);
-       // added this to omit the first user join message because it was pointless
-        // Only notify others if there are other users in the room
-        if (rooms[availableRoomId].size > 1) {
-            socket.broadcast.to(availableRoomId).emit('system-message', `A user has joined the room`);
-        }
+    socket.emit("randomRoomFound", availableRoomId);
+    // added this to omit the first user join message because it was pointless
+    // Only notify others if there are other users in the room
+    if (rooms[availableRoomId].size > 1) {
+      socket.broadcast.to(availableRoomId).emit("system-message", `A user has joined the room`);
+    }
+  });
+
+  // this is the room availability check so no one randomly can send msgs or join rooms.
+  socket.on("checkRoomAvailability", (room: string) => {
+    console.log(`User ${socket.id} checking availability for room: ${room}`);
+
+    const roomExists = rooms[room] && rooms[room].size > 0;
+    const isFull = roomExists && rooms[room].size >= MAX_ROOM_CAPACITY;
+
+    socket.emit("roomAvailabilityResponse", {
+      roomId: room,
+      exists: roomExists,
+      isFull: isFull,
+      currentUsers: roomExists ? rooms[room].size : 0,
+      maxUsers: MAX_ROOM_CAPACITY,
     });
+  });
 
-    // this is the room availability check so no one randomly can send msgs or join rooms.
-    socket.on('checkRoomAvailability', (room: string) => {
-        console.log(`User ${socket.id} checking availability for room: ${room}`);
+  socket.on("joinRoom", (room: string) => {
+    console.log(`User ${socket.id} requested to join room: ${room}`);
+    console.log(
+      `Current user rooms before join:`,
+      Object.entries(rooms)
+        .filter(([_, participants]) => participants.has(socket.id))
+        .map(([roomId]) => roomId)
+    );
 
-        const roomExists = rooms[room] && rooms[room].size > 0;
-        const isFull = roomExists && rooms[room].size >= MAX_ROOM_CAPACITY;
+    // check is user is already in target room:
+    if (rooms[room] && rooms[room].has(socket.id)) {
+      console.log(`User ${socket.id} is already in room: ${room} - ignoring duplicate join`);
+      return;
+    }
 
-        socket.emit('roomAvailabilityResponse', {
-            roomId: room,
-            exists: roomExists,
-            isFull: isFull,
-            currentUsers: roomExists ? rooms[room].size : 0,
-            maxUsers: MAX_ROOM_CAPACITY
-        });
-    });
+    // Remove user from any existing rooms first /// important for room management ///// AAAAAAAAA
+    for (const [roomId, participants] of Object.entries(rooms)) {
+      if (participants.has(socket.id)) {
+        participants.delete(socket.id);
+        socket.leave(roomId);
+        socket.broadcast.to(roomId).emit("system-message", `A user has left the room`);
 
-    socket.on('joinRoom', (room: string) => {
-
-        console.log(`User ${socket.id} requested to join room: ${room}`);
-        console.log(`Current user rooms before join:`, Object.entries(rooms).filter(([_, participants]) => participants.has(socket.id)).map(([roomId]) => roomId));
-
-        // check is user is already in target room:
-        if (rooms[room] && rooms[room].has(socket.id)) {
-            console.log(`User ${socket.id} is already in room: ${room} - ignoring duplicate join`);
-            return;
+        if (participants.size === 0) {
+          delete rooms[roomId];
+          console.log(`Deleted empty room: ${roomId}`);
         }
+      }
+    }
 
-        // Remove user from any existing rooms first /// important for room management ///// AAAAAAAAA
-        for (const [roomId, participants] of Object.entries(rooms)) {
-            if (participants.has(socket.id)) {
-                participants.delete(socket.id);
-                socket.leave(roomId);
-                socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
+    // Initialize room if it doesn't exist
+    if (!rooms[room]) {
+      rooms[room] = new Set();
+      console.log(`Created new room: ${room}`);
+    }
 
-                if (participants.size === 0) {
-                    delete rooms[roomId];
-                    console.log(`Deleted empty room: ${roomId}`);
-                }
-            }
+    // Check room capacity
+    if (rooms[room].size >= MAX_ROOM_CAPACITY) {
+      socket.emit(
+        "system-message",
+        `Room ${room} is full (${rooms[room].size}/${MAX_ROOM_CAPACITY})`
+      );
+      return;
+    }
+
+    // Join the room
+    socket.join(room);
+    rooms[room].add(socket.id);
+    console.log(
+      `Client ${socket.id} joined room: ${room} (${rooms[room].size}/${MAX_ROOM_CAPACITY})`
+    );
+
+    // Send welcome message to the user who joined
+    socket.emit("system-message", `You joined room: ${room}`);
+
+    // Only notify others if there are other users in the room (consistent with requestRandomRoom)
+    if (rooms[room].size > 1) {
+      socket.broadcast.to(room).emit("system-message", `A user has joined the room`);
+    }
+  });
+
+  // sendMessage event ===>
+  socket.on("sendMessage", (message: string, room: string) => {
+    const messageData = {
+      sender: socket.id,
+      content: message,
+      timestamp: Date.now(),
+      role: undefined, // later for pro/con roles
+    };
+    io.to(room).emit("chat-message", messageData);
+    console.log(`Message sent to room ${room}: ${message}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Client disconnected: ${socket.id}`);
+
+    // Remove user from all rooms they were in
+    for (const [roomId, participants] of Object.entries(rooms)) {
+      if (participants.has(socket.id)) {
+        participants.delete(socket.id);
+        console.log(`Removed user ${socket.id} from room ${roomId}`);
+
+        // Notify remaining users in the room
+        socket.broadcast.to(roomId).emit("system-message", `A user has left the room`);
+
+        // Clean up empty rooms
+        if (participants.size === 0) {
+          delete rooms[roomId];
+          console.log(`Deleted empty room: ${roomId}`);
         }
+      }
+    }
 
-        // Initialize room if it doesn't exist
-        if (!rooms[room]) {
-            rooms[room] = new Set();
-            console.log(`Created new room: ${room}`);
-        }
-
-        // Check room capacity
-        if (rooms[room].size >= MAX_ROOM_CAPACITY) {
-            socket.emit('system-message', `Room ${room} is full (${rooms[room].size}/${MAX_ROOM_CAPACITY})`);
-            return;
-        }
-
-        // Join the room
-        socket.join(room);
-        rooms[room].add(socket.id);
-        console.log(`Client ${socket.id} joined room: ${room} (${rooms[room].size}/${MAX_ROOM_CAPACITY})`);
-
-        // Send welcome message to the user who joined
-        socket.emit('system-message', `You joined room: ${room}`);
-
-        // Only notify others if there are other users in the room (consistent with requestRandomRoom)
-        if (rooms[room].size > 1) {
-            socket.broadcast.to(room).emit('system-message', `A user has joined the room`);
-        }
-    });
-
-    // sendMessage event ===>
-    socket.on('sendMessage', (message: string, room: string) => {
-        const messageData = {
-            sender: socket.id,
-            content: message,
-            timestamp: Date.now(),
-            role: undefined // later for pro/con roles
-        };
-        io.to(room).emit('chat-message', messageData);
-        console.log(`Message sent to room ${room}: ${message}`);
-    });
-
-    socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
-
-        // Remove user from all rooms they were in
-        for (const [roomId, participants] of Object.entries(rooms)) {
-            if (participants.has(socket.id)) {
-                participants.delete(socket.id);
-                console.log(`Removed user ${socket.id} from room ${roomId}`);
-
-                // Notify remaining users in the room
-                socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
-
-                // Clean up empty rooms
-                if (participants.size === 0) {
-                    delete rooms[roomId];
-                    console.log(`Deleted empty room: ${roomId}`);
-                }
-            }
-        }
-
-        console.log(`Remaining rooms:`, Object.keys(rooms).map(roomId => `${roomId} (${rooms[roomId].size} users)`));
-    });
+    console.log(
+      `Remaining rooms:`,
+      Object.keys(rooms).map((roomId) => `${roomId} (${rooms[roomId].size} users)`)
+    );
+  });
 });
 
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
