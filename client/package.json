@@ -7,7 +7,9 @@
         "dev": "next dev -p 3001",
         "build": "next build",
         "start": "next start",
-    "lint": "eslint --ext .ts,.tsx --max-warnings 0 . || true"
+        "lint": "next lint",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+        "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
     },
     "dependencies": {
         "@clerk/nextjs": "^6.33.4",

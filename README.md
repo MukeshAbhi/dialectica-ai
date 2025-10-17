@@ -11,18 +11,19 @@
 
 </div>
 
+Where ideas collide in real time — **Dialectica AI** lets you debate, match, and connect instantly.
+
 ## Features
 
-- **Real-time Communication**: Instant messaging powered by Socket.io
-- **Room-based Debates**: Create or join specific debate rooms
-- **Random Room Matching**: Get paired with available participants
+- **Real-time Communication**: Talk in real-time using fast messaging powered by Socket.io
+- **Room-based Debates**: Pick a debate room or make your own
+- **Random Room Matching**: Get paired with someone randomly if no room is chosen
 - **Modern UI**: Clean, responsive interface with dark/light mode support
-- **Room Management**: Smart room capacity handling (max 2 participants per room)
-- **Real-time Status**: Live connection status indicators
-
+- **Room Management**:Each room allows only 2 people for focused debates
+- **Real-time Status**: See who's online and connect instantly
 ## Tech Stack
 
-### Frontend
+### Frontend - what you see and interact with
 - **Next.js 15** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
@@ -30,7 +31,7 @@
 - **Next-Auth** - Authentication (configured)
 - **Framer Motion** - Smooth animations
 
-### Backend
+### Backend - what runs behind the screen
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **Socket.io** - WebSocket implementation
@@ -38,7 +39,7 @@
 - **PostgreSQL** - Database
 - **TypeScript** - Type-safe server development
 
-## Getting Started
+## Ready to go? Here's how
 
 ### Prerequisites
 - Node.js 18+
@@ -96,11 +97,11 @@
 
 ```
 dialectica-ai/
-├── client/                 # Next.js frontend application
+├── client/                 # Frontend (Next.js)
 │   ├── src/
 │   │   ├── app/           # App Router pages
-│   │   ├── components/    # Reusable UI components
-│   │   ├── hooks/         # Custom React hooks
+│   │   ├── components/    # UI building blocks 
+│   │   ├── hooks/         # Custom React logic
 │   │   └── lib/           # Utility functions and configurations
 │   └── types/             # TypeScript type definitions
 ├── server/                # Express.js backend application
@@ -115,10 +116,10 @@ dialectica-ai/
 
 ## Usage
 
-1. **Create or Join a Room**: Enter a room name on the homepage
-2. **Random Matching**: Click "Join Random Available Room" to be paired automatically
+1. **Create or Join a Room**: Type a room name on the homepage to start or enter an existing debate 
+2. **Get Matched Automatically**: Click "Join Random Available Room" to be paired instantly
 3. **Start Debating**: Send messages in real-time with other participants
-4. **Room Management**: Rooms automatically handle capacity and cleanup
+4. **Room Management**: Each room allows only 2 people and cleans up automatically when empty
 
 ## Environment Variables
 
@@ -149,7 +150,8 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:5003
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions!
+Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 **🔀 Branch Strategy**: All contributions should be made to the `develop` branch. Please ensure your pull requests target `develop` and not `main`.
 
@@ -168,27 +170,50 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Socket Events
 
 #### Client → Server
-- `requestRandomRoom` - Request to join any available room
-- `joinRoom(roomId)` - Join a specific room
-- `sendMessage(message, roomId)` - Send a message to a room
+- `requestRandomRoom` - Ask the server to find any available room 
+- `joinRoom(roomId)` - Enter a specific room by its ID
+- `sendMessage(message, roomId)` - Send a chat message to a room
 - `checkRoomAvailability(roomId)` - Check if room exists and has space
 
 #### Server → Client
-- `chat-message` - Receive chat messages
+- `chat-message` - A new message from your debate partner
 - `system-message` - Receive system notifications
 - `randomRoomFound(roomId)` - Notification of successful random room match
-- `roomAvailabilityResponse` - Response to room availability check
+- `roomAvailabilityResponse` - Tells you if a room is available or full
+
+### Why It Matters
+These events make real-time chat and room matching possible. If you're contributing to the frontend or backend, understanding these will help you:
+- Build new features like debate scoring or moderation
+- Fix bugs related to room joining or message delivery
+- Test socket connections during development
 
 ## Database Schema
 
 The application uses Prisma ORM with the following main models:
 
-- **User**: User accounts and profiles
-- **Room**: Debate room information
-- **Message**: Chat messages with relationships
+- **User**: - Stores account info like name, email, and profile details
+            - Linked to the rooms they join and messages they send
 
-## Roadmap
+- **Room**: - Each room is a space for two users to debate
+            - Tracks room name, status (active/inactive), and participants
 
+- **Message**: - Stores every chat message sent in a room
+               - Linked to both the user who sent it and the room it belongs to
+               - Includes timestamps for when messages were sent
+### How They Connect ?
+- A User can join many Rooms
+- A Room can have up to 2 Users
+- A Message belongs to one User and one Room
+
+## Roadmap (What's Done & What's Coming)
+
+ ### Already Built
+- Real-time Chat
+- Room Matching
+- Smart Room Limits
+- User Login
+
+### In Progress/ Planned
 - [ ] AI-powered debate moderation
 - [ ] User authentication and profiles
 - [ ] Debate scoring and analytics
@@ -207,6 +232,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
+This project wouldn’t be possible without the amazing tools and contributors who make open source great:
 - Socket.io team for real-time communication
 - Next.js team for the excellent React framework
 - Prisma team for the database toolkit
@@ -215,3 +241,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ⭐ Star this repository if you find it useful!
+

@@ -1,64 +1,64 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSignIn } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Eye, EyeOff, Mail, Lock } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { useSignIn } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function CustomSignIn() {
-  const { isLoaded, signIn, setActive } = useSignIn()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isLoaded) return
+    e.preventDefault();
+    if (!isLoaded) return;
 
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
       const result = await signIn.create({
         identifier: email,
         password,
-      })
+      });
 
       if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId })
-        router.push("/")
+        await setActive({ session: result.createdSessionId });
+        router.push("/");
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "An error occurred during sign in.")
+      setError(err?.errors?.[0]?.message || "An error occurred during sign in.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
-    if (!isLoaded) return
+    if (!isLoaded) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
-      })
+      });
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "An error occurred with Google sign in.")
-      setIsLoading(false)
+      setError(err?.errors?.[0]?.message || "An error occurred with Google sign in.");
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-4">
@@ -108,7 +108,9 @@ export default function CustomSignIn() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-neutral-300">Email</Label>
+              <Label htmlFor="email" className="text-neutral-300">
+                Email
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                 <Input
@@ -123,7 +125,9 @@ export default function CustomSignIn() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-neutral-300">Password</Label>
+              <Label htmlFor="password" className="text-neutral-300">
+                Password
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                 <Input
@@ -151,9 +155,7 @@ export default function CustomSignIn() {
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-400 text-sm text-center">{error}</div>
-            )}
+            {error && <div className="text-red-400 text-sm text-center">{error}</div>}
 
             <Button
               type="submit"
@@ -166,12 +168,15 @@ export default function CustomSignIn() {
 
           <div className="text-center text-sm text-neutral-400">
             Don't have an account?{" "}
-            <Link href="/auth/sign-up" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+            <Link
+              href="/auth/sign-up"
+              className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+            >
               Sign up
             </Link>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
