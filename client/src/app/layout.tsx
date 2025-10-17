@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "Dialectica AI - Real-time Debate Platform",
   description:
     "Join structured debates in real-time. Create or join debate rooms and engage in meaningful discussions with other participants.",
+  icons: {
+    icon: "/logo.ico", // only one .ico file
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +30,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <link rel="icon" href="/logo.ico" />
+        </head>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {children}
         </body>
