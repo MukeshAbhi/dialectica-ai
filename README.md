@@ -153,7 +153,7 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:5003
 We welcome contributions!
 Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-**🔀 Branch Strategy**: All contributions should be made to the `develop` branch. Please ensure your pull requests target `develop` and not `main`.
+**🔀 Branch Strategy**: All contributions should be made to the `main` branch. Please ensure your pull requests target `main`.
 
 **⏰ Pull Request Review Schedule**: All pull requests will be reviewed and merged daily at 6:30 PM EST.
 
@@ -241,4 +241,5 @@ This project wouldn’t be possible without the amazing tools and contributors w
 ---
 
 ⭐ Star this repository if you find it useful!
+
 
