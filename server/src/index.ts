@@ -25,6 +25,14 @@ app.get('/', (req, res) => {
 
 const rooms: { [roomId: string]: Set<string> } = {};
 
+// Map socket.id to persistent userId
+const socketToUser: { [socketId: string]: string } = {};
+
+// In-memory message history per room (non-persistent)
+const roomMessages: {
+    [roomId: string]: Array<{ sender: string; content: string; timestamp: number; role?: string }>
+} = {};
+
 const MAX_ROOM_CAPACITY = 2;
 
 // statistics:
@@ -38,6 +46,12 @@ io.on('connection', (socket: Socket) => {
     console.log(`New client connected: ${socket.id}`);
     console.log('Current rooms:', getRoomStats());
 
+    // Handle user identification (persistent across reconnects)
+    socket.on('identify', (userId: string) => {
+        socketToUser[socket.id] = userId;
+        console.log(`🆔 User identified: socket ${socket.id} -> userId ${userId}`);
+    });
+
     socket.on('requestRandomRoom', () => {
         // Remove user from any existing rooms first
         for (const [roomId, participants] of Object.entries(rooms)) {
@@ -48,10 +62,10 @@ io.on('connection', (socket: Socket) => {
 
                 // ok so removed the socket.ids for privacy and security
 
-                // Clean up empty rooms
+                // Clean up empty rooms (but keep message history)
                 if (participants.size === 0) {
                     delete rooms[roomId];
-                    console.log(`Deleted empty room: ${roomId}`);
+                    console.log(`Deleted empty room: ${roomId} (keeping message history)`);
                 }
             }
         }
@@ -78,6 +92,10 @@ io.on('connection', (socket: Socket) => {
         socket.join(availableRoomId);
         rooms[availableRoomId].add(socket.id);
         console.log(`User ${socket.id} joined room: ${availableRoomId} (${rooms[availableRoomId].size}/${MAX_ROOM_CAPACITY})`);
+
+        // Send existing room history to the user who joined
+        console.log(`📤 [requestRandomRoom] Sending room history for ${availableRoomId}:`, roomMessages[availableRoomId]?.length || 0, 'messages');
+        socket.emit('room-history', roomMessages[availableRoomId] || []);
 
         socket.emit('randomRoomFound', availableRoomId);
        // added this to omit the first user join message because it was pointless
@@ -123,7 +141,7 @@ io.on('connection', (socket: Socket) => {
 
                 if (participants.size === 0) {
                     delete rooms[roomId];
-                    console.log(`Deleted empty room: ${roomId}`);
+                    console.log(`Deleted empty room: ${roomId} (keeping message history)`);
                 }
             }
         }
@@ -145,6 +163,10 @@ io.on('connection', (socket: Socket) => {
         rooms[room].add(socket.id);
         console.log(`Client ${socket.id} joined room: ${room} (${rooms[room].size}/${MAX_ROOM_CAPACITY})`);
 
+        // Send existing room history to the user who joined
+        console.log(`📤 [joinRoom] Sending room history for ${room}:`, roomMessages[room]?.length || 0, 'messages');
+        socket.emit('room-history', roomMessages[room] || []);
+
         // Send welcome message to the user who joined
         socket.emit('system-message', `You joined room: ${room}`);
 
@@ -156,18 +178,33 @@ io.on('connection', (socket: Socket) => {
 
     // sendMessage event ===>
     socket.on('sendMessage', (message: string, room: string) => {
+        console.log(`📨 [Server] Received sendMessage from ${socket.id} - Room: ${room}, Message: ${message}`);
+        // Use persistent userId if available, otherwise fall back to socket.id
+        const senderId = socketToUser[socket.id] || socket.id;
         const messageData = {
-            sender: socket.id,
+            sender: senderId,
             content: message,
             timestamp: Date.now(),
             role: undefined // later for pro/con roles
         };
+        // Persist in room history with a rolling cap
+        if (!roomMessages[room]) {
+            roomMessages[room] = [];
+        }
+        roomMessages[room].push(messageData);
+        if (roomMessages[room].length > 200) {
+            roomMessages[room].splice(0, roomMessages[room].length - 200);
+        }
+        console.log(`💾 Stored message in room ${room}. Total messages in history:`, roomMessages[room].length);
         io.to(room).emit('chat-message', messageData);
         console.log(`Message sent to room ${room}: ${message}`);
     });
 
     socket.on('disconnect', () => {
         console.log(`Client disconnected: ${socket.id}`);
+
+        // Clean up user identification mapping
+        delete socketToUser[socket.id];
 
         // Remove user from all rooms they were in
         for (const [roomId, participants] of Object.entries(rooms)) {
@@ -178,10 +215,10 @@ io.on('connection', (socket: Socket) => {
                 // Notify remaining users in the room
                 socket.broadcast.to(roomId).emit('system-message', `A user has left the room`);
 
-                // Clean up empty rooms
+                // Clean up empty rooms (but keep message history)
                 if (participants.size === 0) {
                     delete rooms[roomId];
-                    console.log(`Deleted empty room: ${roomId}`);
+                    console.log(`Deleted empty room: ${roomId} (keeping message history)`);
                 }
             }
         }

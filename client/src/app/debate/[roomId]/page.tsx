@@ -31,20 +31,49 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     const [hasAddedWelcomeMessage, setHasAddedWelcomeMessage] = useState(false);
 
 
-    const socketRef = useRef<SocketIOClient.Socket | null>(null);
+    const socketRef = useRef<any>(null);
 
     // Join room on mount:
     useEffect(() => {
         if (roomId) {
             socketRef.current = getSocket();
 
-            // Check if already connected
+            // Generate or retrieve persistent user ID
+            let persistentUserId = localStorage.getItem('dialectica_user_id');
+            if (!persistentUserId) {
+                persistentUserId = `user_${Math.random().toString(36).substring(2, 11)}`;
+                localStorage.setItem('dialectica_user_id', persistentUserId);
+                console.log('🆔 [Client] Generated new persistent userId:', persistentUserId);
+            } else {
+                console.log('🆔 [Client] Retrieved persistent userId:', persistentUserId);
+            }
+            
+            // Set current user ID to persistent ID
+            setCurrentUserId(persistentUserId);
+
+            // Identify user to server with persistent ID
             if (socketRef.current.connected) {
-                setCurrentUserId(socketRef.current.id || "");
+                socketRef.current.emit('identify', persistentUserId);
                 setIsConnected(true);
             }
 
             // event listeners, Chat and System messages ===>
+            const historyHandler = (
+                history: Array<{ sender: string; content: string; timestamp: number; role?: string }>
+            ) => {
+                console.log('📥 [Client] Received room-history:', history?.length || 0, 'messages', history);
+                setMessages(
+                    (history || []).map((msg) => ({
+                        user: msg.sender,
+                        sender: msg.sender,
+                        content: msg.content,
+                        timestamp: msg.timestamp || Date.now(),
+                        type: "chat" as const,
+                        role: msg.role as "pro" | "con" | undefined,
+                    }))
+                );
+                console.log('✅ [Client] Messages state updated with history');
+            };
             const chatHandler = (msg: { sender: string; content: string; timestamp: number; role?: string }) => {
                 setMessages(prev => [
                     ...prev,
@@ -72,6 +101,8 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                 ]);
             };
 
+            console.log('🔌 [Client] Registering socket listeners for room:', roomId);
+            socketRef.current.on("room-history", historyHandler);
             socketRef.current.on("chat-message", chatHandler);
             socketRef.current.on("system-message", systemHandler);
 
@@ -80,7 +111,13 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 
             socketRef.current.on("connect", () => {
                 setIsConnected(true);
-                setCurrentUserId(socketRef.current?.id || "");
+                // On reconnect, re-identify with persistent user ID
+                const persistentUserId = localStorage.getItem('dialectica_user_id');
+                if (persistentUserId && socketRef.current) {
+                    socketRef.current.emit('identify', persistentUserId);
+                    setCurrentUserId(persistentUserId);
+                    console.log('🔄 [Client] Reconnected and re-identified as:', persistentUserId);
+                }
             });
 
             socketRef.current.on("disconnect", () => {
@@ -92,6 +129,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
             const fromRandom = urlParams.get('fromRandom');
 
             if (fromRandom && !hasAddedWelcomeMessage) {
+                console.log('🎲 [Client] Coming from random room, skipping joinRoom emit');
                 // For random room users, send a welcome message since they're already in the room
                 setMessages(prev => [
                     ...prev,
@@ -111,11 +149,13 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                 window.history.replaceState({}, '', newUrl);
             } else if (!fromRandom) {
                 // calling joinRoom if NOT coming from random room
+                console.log('🚪 [Client] Emitting joinRoom for:', roomId);
                 socketRef.current.emit("joinRoom", roomId);
             }
 
             return () => {
                 if (socketRef.current) {
+                    socketRef.current.off("room-history", historyHandler);
                     socketRef.current.off("chat-message", chatHandler);
                     socketRef.current.off("system-message", systemHandler);
                     socketRef.current.off("connect");
@@ -163,8 +203,16 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     // Functions to handle sending messages:
     const handleSend = () => {
         if (messageInput.trim() && roomId && socketRef.current && isConnected) {
+            console.log('📤 [Client] Sending message to room:', roomId, 'Message:', messageInput);
             socketRef.current.emit("sendMessage", messageInput, roomId);
             setMessageInput("");
+        } else {
+            console.warn('⚠️ [Client] Cannot send message:', {
+                hasInput: !!messageInput.trim(),
+                hasRoomId: !!roomId,
+                hasSocket: !!socketRef.current,
+                isConnected
+            });
         }
     };
 
