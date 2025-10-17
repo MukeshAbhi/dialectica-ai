@@ -139,7 +139,7 @@ const HomePage: React.FC = () => {
               Please sign in to join debates
             </p>
             <SignInButton mode="redirect">
-              <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer">
                 Sign In to Continue
               </button>
             </SignInButton>
@@ -180,7 +180,7 @@ const HomePage: React.FC = () => {
           <button
             onClick={handleJoinRoom}
             disabled={!roomName.trim()}
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
           >
             Join Room
           </button>
@@ -199,7 +199,7 @@ const HomePage: React.FC = () => {
           <button
             onClick={handleJoinRandomRoom}
             disabled={!isSocketConnected}
-            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
           >
             Join Random Available Room
           </button>
