@@ -16,9 +16,9 @@
         "install:all": "npm install && cd server && npm install && cd ../client && npm install",
         "clean": "rm -rf node_modules server/node_modules client/node_modules server/dist client/.next",
         "lint": "cd client && npm run lint",
-        "db:migrate": "cd server && npx prisma migrate dev",
-        "db:generate": "cd server && npx prisma generate",
-        "db:studio": "cd server && npx prisma studio"
+        "db:migrate": "cd client && npx prisma migrate dev",
+        "db:generate": "cd client && npx prisma generate",
+        "db:studio": "cd client && npx prisma studio"
     },
     "keywords": [
         "debate",

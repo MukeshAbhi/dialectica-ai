@@ -3,15 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
 
 export default function CustomSignIn() {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +25,7 @@ export default function CustomSignIn() {
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-4">
       <Card className="w-full max-w-md bg-neutral-900 border-neutral-800">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-white">
-            Welcome back
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
           <CardDescription className="text-neutral-400">
             Sign in to your account to continue
           </CardDescription>
@@ -75,9 +66,7 @@ export default function CustomSignIn() {
               <Separator className="w-full bg-neutral-700" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-neutral-900 px-2 text-neutral-500">
-                Or continue with
-              </span>
+              <span className="bg-neutral-900 px-2 text-neutral-500">Or continue with</span>
             </div>
           </div>
 
@@ -88,19 +77,13 @@ export default function CustomSignIn() {
             onClick={() => handleOAuthSignIn("twitter")}
             disabled={isLoading}
           >
-            <svg
-              className="mr-2 h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
+            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.954 4.569c-.885.392-1.83.656-2.825.775a4.932 4.932 0 0 0 2.163-2.723 9.864 9.864 0 0 1-3.127 1.184A4.918 4.918 0 0 0 16.616 3c-2.723 0-4.932 2.209-4.932 4.932 0 .39.045.765.127 1.124C7.728 8.84 4.1 6.86 1.671 3.884a4.93 4.93 0 0 0-.666 2.475c0 1.708.869 3.216 2.188 4.099a4.92 4.92 0 0 1-2.229-.616v.06c0 2.385 1.693 4.374 3.946 4.827a4.935 4.935 0 0 1-2.224.084 4.934 4.934 0 0 0 4.604 3.417A9.875 9.875 0 0 1 .96 19.54a13.905 13.905 0 0 0 7.548 2.212c9.057 0 14.009-7.514 14.009-14.009 0-.213-.005-.425-.014-.636a10.012 10.012 0 0 0 2.451-2.548z" />
             </svg>
             Continue with Twitter
           </Button>
 
-          {error && (
-            <div className="text-red-400 text-sm text-center">{error}</div>
-          )}
+          {error && <div className="text-red-400 text-sm text-center">{error}</div>}
         </CardContent>
       </Card>
     </div>
