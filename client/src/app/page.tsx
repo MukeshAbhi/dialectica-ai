@@ -127,7 +127,7 @@ const HomePage: React.FC = () => {
   if (status === "unauthenticated") {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-        {/* <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
               Dialectica AI
@@ -144,14 +144,14 @@ const HomePage: React.FC = () => {
               Sign In to Continue
             </Button>
           </div>
-        </div> */}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-      {/* <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
@@ -177,14 +177,26 @@ const HomePage: React.FC = () => {
               type="text"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const trimmedRoomName = roomName.trim();
+                  if (trimmedRoomName) {
+                    router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+                  }
+                }
+              }}
               placeholder="Enter room name..."
               className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <button
-            onClick={handleJoinRoom}
+            onClick={() => {
+              const trimmedRoomName = roomName.trim();
+              if (trimmedRoomName) {
+                router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+              }
+            }}
             disabled={!roomName.trim()}
             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
           >
@@ -203,14 +215,16 @@ const HomePage: React.FC = () => {
           </div>
 
           <button
-            onClick={handleJoinRandomRoom}
-            disabled={!isSocketConnected}
-            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
+            onClick={() => {
+              const randomId = Math.random().toString(36).substring(2, 8);
+              router.push(`/debate/${randomId}`);
+            }}
+            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition cursor-pointer"
           >
-            Join Random Available Room
+            Create Random Room
           </button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };
