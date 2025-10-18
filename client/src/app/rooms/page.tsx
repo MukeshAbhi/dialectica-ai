@@ -1,4 +1,11 @@
-import { Card, CardAction, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { IconHome, IconUsers, IconSettings, IconLogout, IconUser } from "@tabler/icons-react";
@@ -26,7 +33,9 @@ export default function RoomPage() {
     {
       label: "Settings",
       href: "/settings",
-      icon: <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+      icon: (
+        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
     },
     {
       label: "Logout",
@@ -68,7 +77,9 @@ export default function RoomPage() {
         <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
           <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
             <div>
-              <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Active Rooms</h2>
+              <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+                Active Rooms
+              </h2>
               <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2">
                 Join a debate room or create your own
               </p>
@@ -87,10 +98,7 @@ export default function RoomPage() {
                     {room.title}
                   </CardTitle>
                   <CardAction>
-                    <Button 
-                      size="sm" 
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                       Join
                     </Button>
                   </CardAction>

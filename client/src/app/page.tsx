@@ -3,14 +3,14 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSocket } from "@/lib/socket";
-import { signOut, useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
 const HomePage: React.FC = () => {
   const [roomName, setRoomName] = useState("");
   const router = useRouter();
   const socketRef = useRef<SocketIOClient.Socket | null>(null);
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -123,7 +123,6 @@ const HomePage: React.FC = () => {
     );
   }
 
-
   // handle unauthenticated
   if (status === "unauthenticated") {
     return (
@@ -158,13 +157,17 @@ const HomePage: React.FC = () => {
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
               Dialectica AI
             </h1>
-            <Button variant="destructive" onClick={() => signOut()}className="bg-red-400 text-white hover:bg-red-600" >
+            <Button
+              variant="destructive"
+              onClick={() => signOut()}
+              className="bg-red-400 text-white hover:bg-red-600"
+            >
               Sign Out
             </Button>
           </div>
           <p className="text-neutral-600 dark:text-neutral-400">
-            Welcome back, {session?.user?.name || "Debater"}! Join or create a debate
-            room to get started.
+            Welcome back, {session?.user?.name || "Debater"}! Join or create a debate room to get
+            started.
           </p>
         </div>
 
