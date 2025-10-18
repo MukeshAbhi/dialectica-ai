@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { getSocket } from "@/lib/socket";
-import { useUser, UserButton, SignInButton } from "@clerk/nextjs";
+import { signOut, useSession } from "next-auth/react"
+import { Button } from "@/components/ui/button";
 
 const HomePage: React.FC = () => {
   const [roomName, setRoomName] = useState("");
   const router = useRouter();
   const socketRef = useRef<SocketIOClient.Socket | null>(null);
-  const { isSignedIn, user, isLoaded } = useUser();
-
+  const { data: session, status } = useSession()
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     socketRef.current = getSocket();
@@ -114,20 +114,18 @@ const HomePage: React.FC = () => {
   //     router.push(`/debate/${randomId}`);
   // };
 
-  // Show loading state while Clerk is initializing
-  if (!isLoaded) {
+  // 🔹 handle loading state first
+  if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600 dark:text-neutral-400">Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-neutral-900">
+        <p className="text-neutral-600 dark:text-neutral-400">Loading session...</p>
       </div>
     );
   }
 
-  // Show sign-in prompt if user is not authenticated
-  if (!isSignedIn) {
+
+  // handle unauthenticated
+  if (status === "unauthenticated") {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
@@ -138,11 +136,14 @@ const HomePage: React.FC = () => {
             <p className="text-neutral-600 dark:text-neutral-400 mb-6">
               Please sign in to join debates
             </p>
-            <SignInButton mode="redirect">
-              <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer">
-                Sign In to Continue
-              </button>
-            </SignInButton>
+            <Button
+              variant="default"
+              size="lg"
+              onClick={() => router.push("/signin")}
+              className="bg-blue-700 text-white hover:bg-blue-800 "
+            >
+              Sign In to Continue
+            </Button>
           </div>
         </div>
       </div>
@@ -157,10 +158,12 @@ const HomePage: React.FC = () => {
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
               Dialectica AI
             </h1>
-            <UserButton afterSignOutUrl="/" />
+            <Button variant="destructive" onClick={() => signOut()}className="bg-red-400 text-white hover:bg-red-600" >
+              Sign Out
+            </Button>
           </div>
           <p className="text-neutral-600 dark:text-neutral-400">
-            Welcome back, {user?.firstName || user?.username || "Debater"}! Join or create a debate
+            Welcome back, {session?.user?.name || "Debater"}! Join or create a debate
             room to get started.
           </p>
         </div>

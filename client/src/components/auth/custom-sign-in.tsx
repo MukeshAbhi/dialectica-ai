@@ -1,61 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useSignIn } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import Link from "next/link";
+
 
 export default function CustomSignIn() {
-  const { isLoaded, signIn, setActive } = useSignIn();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isLoaded) return;
-
+  const handleOAuthSignIn = async (provider: "google" | "twitter") => {
     setIsLoading(true);
     setError("");
-
     try {
-      const result = await signIn.create({
-        identifier: email,
-        password,
-      });
-
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        router.push("/");
-      }
+      await signIn(provider, { callbackUrl: "/" });
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "An error occurred during sign in.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    if (!isLoaded) return;
-
-    setIsLoading(true);
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
-      });
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "An error occurred with Google sign in.");
+      setError("An error occurred during sign in.");
       setIsLoading(false);
     }
   };
@@ -64,16 +32,20 @@ export default function CustomSignIn() {
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-4">
       <Card className="w-full max-w-md bg-neutral-900 border-neutral-800">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-white">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-white">
+            Welcome back
+          </CardTitle>
           <CardDescription className="text-neutral-400">
             Sign in to your account to continue
           </CardDescription>
         </CardHeader>
+
         <CardContent className="space-y-4">
+          {/* Google Sign-In */}
           <Button
             variant="outline"
             className="w-full bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white"
-            onClick={handleGoogleSignIn}
+            onClick={() => handleOAuthSignIn("google")}
             disabled={isLoading}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -97,84 +69,38 @@ export default function CustomSignIn() {
             Continue with Google
           </Button>
 
+          {/* Separator */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <Separator className="w-full bg-neutral-700" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-neutral-900 px-2 text-neutral-500">Or continue with</span>
+              <span className="bg-neutral-900 px-2 text-neutral-500">
+                Or continue with
+              </span>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-neutral-300">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-neutral-300">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-neutral-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-neutral-500" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {error && <div className="text-red-400 text-sm text-center">{error}</div>}
-
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading}
+          {/* Twitter Sign-In */}
+          <Button
+            variant="outline"
+            className="w-full bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-white"
+            onClick={() => handleOAuthSignIn("twitter")}
+            disabled={isLoading}
+          >
+            <svg
+              className="mr-2 h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="currentColor"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
+              <path d="M23.954 4.569c-.885.392-1.83.656-2.825.775a4.932 4.932 0 0 0 2.163-2.723 9.864 9.864 0 0 1-3.127 1.184A4.918 4.918 0 0 0 16.616 3c-2.723 0-4.932 2.209-4.932 4.932 0 .39.045.765.127 1.124C7.728 8.84 4.1 6.86 1.671 3.884a4.93 4.93 0 0 0-.666 2.475c0 1.708.869 3.216 2.188 4.099a4.92 4.92 0 0 1-2.229-.616v.06c0 2.385 1.693 4.374 3.946 4.827a4.935 4.935 0 0 1-2.224.084 4.934 4.934 0 0 0 4.604 3.417A9.875 9.875 0 0 1 .96 19.54a13.905 13.905 0 0 0 7.548 2.212c9.057 0 14.009-7.514 14.009-14.009 0-.213-.005-.425-.014-.636a10.012 10.012 0 0 0 2.451-2.548z" />
+            </svg>
+            Continue with Twitter
+          </Button>
 
-          <div className="text-center text-sm text-neutral-400">
-            Don't have an account?{" "}
-            <Link
-              href="/auth/sign-up"
-              className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
-            >
-              Sign up
-            </Link>
-          </div>
+          {error && (
+            <div className="text-red-400 text-sm text-center">{error}</div>
+          )}
         </CardContent>
       </Card>
     </div>
