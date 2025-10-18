@@ -14,99 +14,99 @@ const HomePage: React.FC = () => {
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    socketRef.current = getSocket();
+  // useEffect(() => {
+  //   socketRef.current = getSocket();
 
-    socketRef.current.on("connect", () => {
-      setIsSocketConnected(true);
-      console.log("Socket connected:", socketRef.current?.id);
-    });
+  //   socketRef.current.on("connect", () => {
+  //     setIsSocketConnected(true);
+  //     console.log("Socket connected:", socketRef.current?.id);
+  //   });
 
-    socketRef.current.on("disconnect", () => {
-      setIsSocketConnected(false);
-      console.log("Socket disconnected");
-    });
+  //   socketRef.current.on("disconnect", () => {
+  //     setIsSocketConnected(false);
+  //     console.log("Socket disconnected");
+  //   });
 
-    socketRef.current.on("randomRoomFound", (roomId: string) => {
-      console.log("Random room found:", roomId);
+  //   socketRef.current.on("randomRoomFound", (roomId: string) => {
+  //     console.log("Random room found:", roomId);
 
-      router.push(`/debate/${roomId}?fromRandom=true`); // adding a query parameter to indicate the room was joined randomly.
-    });
+  //     router.push(`/debate/${roomId}?fromRandom=true`); // adding a query parameter to indicate the room was joined randomly.
+  //   });
 
-    // room availability response [WORKS FOR NOW - but needs to be improved]
-    socketRef.current.on(
-      "roomAvailabilityResponse",
-      (response: {
-        roomId: string;
-        exists: boolean;
-        isFull: boolean;
-        currentUsers: number;
-        maxUsers: number;
-      }) => {
-        console.log("Room availability response:", response);
+  //   // room availability response [WORKS FOR NOW - but needs to be improved]
+  //   socketRef.current.on(
+  //     "roomAvailabilityResponse",
+  //     (response: {
+  //       roomId: string;
+  //       exists: boolean;
+  //       isFull: boolean;
+  //       currentUsers: number;
+  //       maxUsers: number;
+  //     }) => {
+  //       console.log("Room availability response:", response);
 
-        if (response.exists && response.isFull) {
-          alert(
-            `Room "${response.roomId}" is full (${response.currentUsers}/${response.maxUsers} users). Please try another room.`
-          );
-          return;
-        }
+  //       if (response.exists && response.isFull) {
+  //         alert(
+  //           `Room "${response.roomId}" is full (${response.currentUsers}/${response.maxUsers} users). Please try another room.`
+  //         );
+  //         return;
+  //       }
 
-        if (response.exists) {
-          const confirmJoin = confirm(
-            `Room "${response.roomId}" already exists with ${response.currentUsers} user(s). Do you want to join it?`
-          );
-          if (!confirmJoin) {
-            return;
-          }
-        }
+  //       if (response.exists) {
+  //         const confirmJoin = confirm(
+  //           `Room "${response.roomId}" already exists with ${response.currentUsers} user(s). Do you want to join it?`
+  //         );
+  //         if (!confirmJoin) {
+  //           return;
+  //         }
+  //       }
 
-        // Navigate to the room
-        router.push(`/debate/${encodeURIComponent(response.roomId)}`);
-      }
-    );
+  //       // Navigate to the room
+  //       router.push(`/debate/${encodeURIComponent(response.roomId)}`);
+  //     }
+  //   );
 
-    // Handle socket connection errors [PENDING]
+  //   // Handle socket connection errors [PENDING]
 
-    // Check if already connected
-    if (socketRef.current.connected) {
-      setIsSocketConnected(true);
-    }
+  //   // Check if already connected
+  //   if (socketRef.current.connected) {
+  //     setIsSocketConnected(true);
+  //   }
 
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off("connect");
-        socketRef.current.off("disconnect");
-        socketRef.current.off("randomRoomFound");
-        socketRef.current.off("roomAvailabilityResponse");
-      }
-    };
-  }, [router]);
+  //   return () => {
+  //     if (socketRef.current) {
+  //       socketRef.current.off("connect");
+  //       socketRef.current.off("disconnect");
+  //       socketRef.current.off("randomRoomFound");
+  //       socketRef.current.off("roomAvailabilityResponse");
+  //     }
+  //   };
+  // }, [router]);
 
-  const handleJoinRandomRoom = () => {
-    if (!isSocketConnected) {
-      alert("Not connected to server yet, please try again...");
-      return;
-    }
-    if (socketRef.current) {
-      socketRef.current.emit("requestRandomRoom");
-    }
-  };
+  // const handleJoinRandomRoom = () => {
+  //   if (!isSocketConnected) {
+  //     alert("Not connected to server yet, please try again...");
+  //     return;
+  //   }
+  //   if (socketRef.current) {
+  //     socketRef.current.emit("requestRandomRoom");
+  //   }
+  // };
 
-  const handleJoinRoom = () => {
-    const trimmedRoomName = roomName.trim();
+  // const handleJoinRoom = () => {
+  //   const trimmedRoomName = roomName.trim();
 
-    // if (trimmedRoomName) {
-    // Navigate to the debate room
-    // router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
-    // }
-    if (trimmedRoomName && socketRef.current && isSocketConnected) {
-      // Check room availability first
-      socketRef.current.emit("checkRoomAvailability", trimmedRoomName);
-    } else if (!isSocketConnected) {
-      alert("Not connected to server yet, please try again...");
-    }
-  };
+  //   // if (trimmedRoomName) {
+  //   // Navigate to the debate room
+  //   // router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+  //   // }
+  //   if (trimmedRoomName && socketRef.current && isSocketConnected) {
+  //     // Check room availability first
+  //     socketRef.current.emit("checkRoomAvailability", trimmedRoomName);
+  //   } else if (!isSocketConnected) {
+  //     alert("Not connected to server yet, please try again...");
+  //   }
+  // };
 
   // const handleCreateRandomRoom = () => {
   //     // Generate a random room ID
@@ -127,7 +127,7 @@ const HomePage: React.FC = () => {
   if (status === "unauthenticated") {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+        {/* <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
               Dialectica AI
@@ -144,14 +144,14 @@ const HomePage: React.FC = () => {
               Sign In to Continue
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+      {/* <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
@@ -210,7 +210,7 @@ const HomePage: React.FC = () => {
             Join Random Available Room
           </button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
