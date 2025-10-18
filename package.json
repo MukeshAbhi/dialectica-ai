@@ -53,8 +53,5 @@
     "devDependencies": {
         "concurrently": "^7.6.0",
         "prettier": "^3.6.2"
-    },
-    "dependencies": {
-        "lightningcss": "^1.30.2"
     }
 }
