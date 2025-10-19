@@ -2,8 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { IconHome, IconMessage, IconUsers, IconSettings, IconLogout } from "@tabler/icons-react";
+import { IconMessage } from "@tabler/icons-react";
 import { getSocket } from "@/lib/socket";
 
 interface ChatPageProps {}
