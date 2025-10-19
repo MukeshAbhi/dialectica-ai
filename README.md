@@ -54,7 +54,19 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    cd dialectica-ai
    ```
 
-2. **Install dependencies**
+**Option 1: Run with Docker**
+
+1. **Build and run the Docker containers**
+   ```bash
+   docker-compose up --build
+   ```
+2. **Access the application**
+   - Frontend: http://localhost:3001
+   - Backend: http://localhost:5003
+
+**Option 2: Run both servers manually**
+
+1. **Install dependencies**
    ```bash
    # Install server dependencies
    cd server
@@ -65,7 +77,7 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm install
    ```
 
-3. **Database Setup**
+2. **Database Setup**
    ```bash
    cd server
    # Set up your DATABASE_URL in .env file
@@ -75,7 +87,7 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npx prisma migrate dev
    ```
 
-4. **Start the development servers**
+3. **Start the development servers**
 
    **Terminal 1 - Backend:**
    ```bash
@@ -89,7 +101,7 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm run dev
    ```
 
-5. **Access the application**
+4. **Access the application**
    - Frontend: http://localhost:3001
    - Backend: http://localhost:5003
 
@@ -103,15 +115,18 @@ dialectica-ai/
 │   │   ├── components/    # UI building blocks 
 │   │   ├── hooks/         # Custom React logic
 │   │   └── lib/           # Utility functions and configurations
+│   │   └── generated/     # Prisma generated client
+│   ├── prisma/            # Prisma schema and migrations
 │   └── types/             # TypeScript type definitions
 ├── server/                # Express.js backend application
 │   ├── src/
-│   │   ├── routers/       # API route handlers
-│   │   ├── services/      # Business logic
-│   │   ├── sockets/       # Socket.io event handlers
-│   │   └── index.ts       # Server entry point
-│   └── prisma/            # Database schema and migrations
-└── docs/                  # Documentation
+│       ├── routers/       # API route handlers
+│       ├── services/      # Business logic
+│       ├── sockets/       # Socket.io event handlers
+│       └── index.ts       # Server entry point
+|── docker-compose.yml     # Docker configuration
+└── README.md              # Project documentation
+
 ```
 
 ## Usage
@@ -125,21 +140,22 @@ dialectica-ai/
 
 ### Server (.env)
 ```env
-DATABASE_URL=postgresql://username:password@localhost:5432/dialectica_ai
 PORT=5003
 ```
 
 ### Client (.env)
 ```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
-CLERK_SECRET_KEY=your_clerk_secret_key_here
+# AuthJS Authentication
+AUTH_SECRET="your-auth-secret"
 
-# Custom Clerk Routes
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/auth/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/auth/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+AUTH_GOOGLE_ID="your-google-client-id"
+AUTH_GOOGLE_SECRET="your-google-client-secret"
+
+AUTH_TWITTER_ID="your-twitter-client-id"
+AUTH_TWITTER_SECRET="your-twitter-client-secret"
+
+# Database Configuration
+DATABASE_URL="postgresql://username:password@localhost:5432/dialectica_ai"
 
 # API Configuration
 NEXT_PUBLIC_API_URL=http://localhost:5003
