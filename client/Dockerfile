@@ -6,10 +6,16 @@ COPY package*.json ./
 
 RUN npm install
 
-COPY . /app
+COPY prisma ./prisma
 
+COPY . .
+
+# dummy DATABASE_URL for build time
+ENV DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
 RUN npm run build
 
 EXPOSE 3001
 
-CMD ["npm", "start"]
+ENV PORT=3001
+
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start"]

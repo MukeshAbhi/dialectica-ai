@@ -4,9 +4,10 @@
     "description": "Frontend client for Dialectica AI - A real-time debate platform",
     "private": true,
     "scripts": {
-        "dev": "next dev -p 3001",
+        "dev": "npx prisma generate && next dev -p 3001",
+        "prebuild": "npx prisma generate",
         "build": "next build",
-        "start": "next start",
+        "start": "next start -p 3001",
         "lint": "next lint",
         "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
         "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""

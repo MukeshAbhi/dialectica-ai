@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: dialectica_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dialectica
+      POSTGRES_PASSWORD: dialectica
+      POSTGRES_DB: dialectica_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dialectica_network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: dialectica_server
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "5003:5003"
+    networks:
+      - dialectica_network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: dialectica_client
+    restart: unless-stopped
+    depends_on:
+      - server
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://dialectica:dialectica@postgres:5432/dialectica_ai
+    env_file:
+      - ./client/.env   
+    ports:
+      - "3001:3001"
+    networks:
+      - dialectica_network
+
+volumes:
+  postgres_data:
+
+networks:
+  dialectica_network:
