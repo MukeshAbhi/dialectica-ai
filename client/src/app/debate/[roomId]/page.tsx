@@ -184,31 +184,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     scrollToBottom();
   }, [messages]);
 
-  const links = [
-    {
-      label: "Home",
-      href: "/",
-      icon: <IconHome className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Rooms",
-      href: "/rooms",
-      icon: <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-      icon: (
-        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "/logout",
-      icon: <IconLogout className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-    },
-  ];
-
   // Functions to handle sending messages:
   const handleSend = () => {
     if (messageInput.trim() && roomId && socketRef.current && isConnected) {
@@ -231,30 +206,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 
   return (
     <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
-      <Sidebar>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <SidebarLink
-              link={{
-                label: "Anant Kavuru",
-                href: "#",
-                icon: (
-                  <div className="h-7 w-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                    AK
-                  </div>
-                ),
-              }}
-            />
-          </div>
-        </SidebarBody>
-      </Sidebar>
 
       {/* Main Chat Area UI which is better now */}
 
