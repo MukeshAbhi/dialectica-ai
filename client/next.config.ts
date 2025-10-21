@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   output: "standalone",
   trailingSlash: false,
   serverExternalPackages: [],
-  outputFileTracingRoot: path.join(__dirname, "../"),
   //image profiles domains for whitelisting
   images: {
     remotePatterns: [
