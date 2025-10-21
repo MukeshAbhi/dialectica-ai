@@ -10,6 +10,7 @@ interface EnhanceModalProps {
   onSendOriginal: () => void;
   onSendEnhanced: () => void;
   onClose: () => void;
+  isConnected: boolean;
 }
 
 function EnhanceModal({
@@ -19,6 +20,7 @@ function EnhanceModal({
   onSendOriginal,
   onSendEnhanced,
   onClose,
+  isConnected,
 }: EnhanceModalProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -65,8 +67,16 @@ function EnhanceModal({
             Send Original
           </button>
           <button
-            onClick={onSendEnhanced}
-            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            onClick={() => {
+              if (!isConnected) {
+                console.warn('[Client] Cannot send enhanced message: socket disconnected');
+                alert('Not connected — cannot send message right now.');
+                return;
+              }
+              onSendEnhanced();
+            }}
+            disabled={!isConnected}
+            className={`flex-1 px-4 py-2 ${isConnected ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-600 cursor-not-allowed'} rounded-lg font-medium transition-colors`}
           >
             Send Enhanced
           </button>
@@ -187,6 +197,7 @@ export function MessageInput({
           onSendOriginal={handleSendOriginal}
           onSendEnhanced={handleSendEnhanced}
           onClose={() => setShowEnhanceModal(false)}
+          isConnected={isConnected}
         />
       )}
     </>
