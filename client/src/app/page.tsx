@@ -97,7 +97,7 @@ export default function LandingPage() {
     <div className="min-h-screen overflow-x-hidden">
       <Navbar />
       {/* Hero Section */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-12 md:pb-16">
+      <section className="relative px-4 sm:px-6 lg:px-8 pt-28 md:pt-36 pb-12 md:pb-16">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -154,7 +154,7 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shadow-2xl">
             {features.map((feature, index) => (
               <FeatureCard
                 key={index}
@@ -176,23 +176,23 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-gradient-to-br from-slate-900 to-slate-600 rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 sm:p-8 md:p-12 text-center"
+            className="bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 sm:p-8 md:p-12 text-center shadow-2xl"
           >
-            <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-blue-600 rounded-2xl mb-4 md:mb-6">
+            <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 md:mb-6">
               <IconSparkles className="w-7 h-7 md:w-8 md:h-8 text-white" />
             </div>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-6 text-gray-900 dark:text-gray-100">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-6 text-white">
               Ready to Elevate Your Discourse?
             </h3>
-            <p className="text-base md:text-lg text-gray-600 dark:text-neutral-400 mb-6 md:mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-white/90 mb-6 md:mb-8 max-w-2xl mx-auto leading-relaxed">
               Join hundreds of thinkers, debaters, and curious minds using Dialectica AI to enhance
               their intellectual journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <button className="px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-300">
+              <button className="px-6 md:px-8 py-3 md:py-4 bg-white text-blue-600 hover:bg-gray-100 rounded-xl font-medium transition-all duration-300 shadow-lg">
                 Join the Community
               </button>
-              <button className="px-6 md:px-8 py-3 md:py-4 bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-gray-100 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors">
+              <button className="px-6 md:px-8 py-3 md:py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white rounded-xl font-medium hover:bg-white/20 transition-colors">
                 Learn More
               </button>
             </div>

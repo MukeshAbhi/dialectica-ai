@@ -42,18 +42,18 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
     <nav
       className={`fixed top-0 left-0 right-0 z-[999] transition-all duration-300 ${
         isScrolled
-          ? "text-white backdrop-blur-lg border-b border-neutral-200"
-          : "bg-transparent"
+          ? "bg-white/90 dark:bg-neutral-900/90 backdrop-blur-lg border-b border-neutral-200 dark:border-neutral-700"
+          : "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm"
       } ${className}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="p-2 rounded-lg bg-white">
+            <div className="p-2 rounded-lg bg-blue-600">
               {/* <IconBrain className="h-6 w-6 text-white" /> */}
             </div>
-            <span className="text-xl font-bold bg-white bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-gray-900 dark:text-white">
               Dialectica AI
             </span>
           </Link>
@@ -66,8 +66,8 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                 href={link.href}
                 className={`text-sm font-medium transition-colors duration-200 ${
                   pathname === link.href
-                    ? "text-white"
-                    : "text-neutral-600 hover:text-white"
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
                 }`}
               >
                 {link.label}
@@ -81,11 +81,11 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               variant="outline"
               size="sm"
               asChild
-              className="border-neutral-300"
+              className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
             >
               <Link href="/main/signin">Sign In</Link>
             </Button>
-            <Button size="sm" asChild className="bg-white text-gray-700">
+            <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white">
               <Link href="/main/signin">Get Started</Link>
             </Button>
           </div>
@@ -94,7 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
           <div className="md:hidden flex items-center space-x-2">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-neutral-700 hover:text-blue-600 hover:bg-neutral-100 transition-colors duration-200"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200"
               aria-label="Toggle menu"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"

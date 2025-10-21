@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSocket } from "@/lib/socket";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/navigation/Navbar";
 
 const HomePage: React.FC = () => {
   const [roomName, setRoomName] = useState("");
@@ -117,61 +118,69 @@ const HomePage: React.FC = () => {
   // 🔹 handle loading state first
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-neutral-900">
-        <p className="text-neutral-600 dark:text-neutral-400">Loading session...</p>
-      </div>
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-neutral-900">
+          <p className="text-neutral-600 dark:text-neutral-400">Loading session...</p>
+        </div>
+      </>
     );
   }
 
   // handle unauthenticated
   if (status === "unauthenticated") {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
-              Dialectica AI
-            </h1>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-              Please sign in to join debates
-            </p>
-            <Button
-              variant="default"
-              size="lg"
-              onClick={() => router.push("/main/signin")}
-              className="bg-blue-700 text-white hover:bg-blue-800 "
-            >
-              Sign In to Continue
-            </Button>
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
+                Dialectica AI
+              </h1>
+              <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                Please sign in to join debates
+              </p>
+              <Button
+                variant="default"
+                size="lg"
+                onClick={() => router.push("/main/signin")}
+                className="bg-blue-700 text-white hover:bg-blue-800 "
+              >
+                Sign In to Continue
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
-              Dialectica AI
-            </h1>
-            <Button
-              variant="destructive"
-              onClick={() => signOut()}
-              className="bg-red-400 text-white hover:bg-red-600"
-            >
-              Sign Out
-            </Button>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
+                Dialectica AI
+              </h1>
+              <Button
+                variant="destructive"
+                onClick={() => signOut()}
+                className="bg-red-400 text-white hover:bg-red-600"
+              >
+                Sign Out
+              </Button>
+            </div>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              Welcome back, {session?.user?.name || "Debater"}! Join or create a debate room to get
+              started.
+            </p>
           </div>
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Welcome back, {session?.user?.name || "Debater"}! Join or create a debate room to get
-            started.
-          </p>
-        </div>
 
-        <div className="space-y-4">
+          <div className="space-y-4">
           <div>
             <input
               type="text"
@@ -224,8 +233,9 @@ const HomePage: React.FC = () => {
             Create Random Room
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
