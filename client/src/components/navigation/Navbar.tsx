@@ -83,10 +83,10 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               asChild
               className="border-neutral-300"
             >
-              <Link href="/auth/sign-in">Sign In</Link>
+              <Link href="/main/signin">Sign In</Link>
             </Button>
             <Button size="sm" asChild className="bg-white text-gray-700">
-              <Link href="/auth/sign-up">Get Started</Link>
+              <Link href="/main/signin">Get Started</Link>
             </Button>
           </div>
 
