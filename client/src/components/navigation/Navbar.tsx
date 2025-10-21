@@ -34,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/app", label: "App" },
+    { href: "/main", label: "App" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -137,14 +137,14 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                     asChild
                     className="justify-center border-neutral-300"
                   >
-                    <Link href="/auth/sign-in">Sign In</Link>
+                    <Link href="/main/signin">Sign In</Link>
                   </Button>
                   <Button
                     size="sm"
                     asChild
                     className="justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   >
-                    <Link href="/auth/sign-up">Get Started</Link>
+                    <Link href="/main/sign-up">Get Started</Link>
                   </Button>
                 </div>
               </div>
