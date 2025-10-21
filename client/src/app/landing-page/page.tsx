@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { 
-  IconMessage, 
-  IconUsers, 
-  IconBrain, 
+import {
+  IconMessage,
+  IconUsers,
+  IconBrain,
   IconSparkles,
   IconArrowRight,
   IconPlayerPlay,
   IconShield,
   IconBolt,
-  IconGlobe
+  IconGlobe,
 } from "@tabler/icons-react";
 
 interface FeatureCardProps {
@@ -54,7 +54,7 @@ const StatCounter: React.FC<StatCounterProps> = ({ target, label, suffix = "", d
     const timer = setTimeout(() => {
       const increment = target / 100;
       const interval = setInterval(() => {
-        setCount(prev => {
+        setCount((prev) => {
           if (prev >= target) {
             clearInterval(interval);
             return target;
@@ -62,7 +62,7 @@ const StatCounter: React.FC<StatCounterProps> = ({ target, label, suffix = "", d
           return Math.min(prev + increment, target);
         });
       }, 20);
-      
+
       return () => clearInterval(interval);
     }, delay);
 
@@ -77,7 +77,8 @@ const StatCounter: React.FC<StatCounterProps> = ({ target, label, suffix = "", d
       className="text-center"
     >
       <div className="text-3xl font-bold text-neutral-900 mb-2">
-        {count.toLocaleString()}{suffix}
+        {count.toLocaleString()}
+        {suffix}
       </div>
       <div className="text-neutral-600 text-sm uppercase tracking-wider">{label}</div>
     </motion.div>
@@ -95,23 +96,27 @@ export default function LandingPage() {
     {
       icon: <IconBrain className="w-6 h-6" />,
       title: "AI-Powered Debates",
-      description: "Engage in intelligent discussions powered by advanced AI that understands context and nuance."
+      description:
+        "Engage in intelligent discussions powered by advanced AI that understands context and nuance.",
     },
     {
       icon: <IconUsers className="w-6 h-6" />,
       title: "Real-time Collaboration",
-      description: "Connect with debaters worldwide in real-time rooms designed for structured discourse."
+      description:
+        "Connect with debaters worldwide in real-time rooms designed for structured discourse.",
     },
     {
       icon: <IconShield className="w-6 h-6" />,
       title: "Secure & Private",
-      description: "Your conversations are protected with end-to-end encryption and privacy-first design."
+      description:
+        "Your conversations are protected with end-to-end encryption and privacy-first design.",
     },
     {
       icon: <IconBolt className="w-6 h-6" />,
       title: "Lightning Fast",
-      description: "Experience instant responses and seamless interactions with our optimized platform."
-    }
+      description:
+        "Experience instant responses and seamless interactions with our optimized platform.",
+    },
   ];
 
   return (
@@ -131,7 +136,8 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-neutral-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Experience the future of intellectual discourse. Engage in AI-powered debates that challenge your thinking and expand your perspectives.
+              Experience the future of intellectual discourse. Engage in AI-powered debates that
+              challenge your thinking and expand your perspectives.
             </p>
           </motion.div>
 
@@ -179,7 +185,8 @@ export default function LandingPage() {
               Powerful Features
             </h2>
             <p className="text-xl text-neutral-700 max-w-2xl mx-auto">
-              Discover the tools that make Dialectica AI the premier platform for intellectual discourse and debate.
+              Discover the tools that make Dialectica AI the premier platform for intellectual
+              discourse and debate.
             </p>
           </motion.div>
 
@@ -213,7 +220,8 @@ export default function LandingPage() {
                 Ready to Elevate Your Discourse?
               </h3>
               <p className="text-lg text-neutral-700 mb-8 max-w-2xl mx-auto">
-                Join thousands of thinkers, debaters, and curious minds who are already using Dialectica AI to enhance their intellectual journey.
+                Join thousands of thinkers, debaters, and curious minds who are already using
+                Dialectica AI to enhance their intellectual journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-medium hover:scale-105 transition-transform">
@@ -236,15 +244,32 @@ export default function LandingPage() {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <IconMessage className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-semibold text-neutral-900 dark:text-white">Dialectica AI</span>
+              <span className="text-lg font-semibold text-neutral-900 dark:text-white">
+                Dialectica AI
+              </span>
             </div>
-            
+
             <div className="flex items-center gap-6 text-neutral-600 dark:text-neutral-400 text-sm">
-              <a href="#" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Contact</a>
+              <a
+                href="#"
+                className="hover:text-neutral-900 dark:hover:text-white transition-colors"
+              >
+                Privacy
+              </a>
+              <a
+                href="#"
+                className="hover:text-neutral-900 dark:hover:text-white transition-colors"
+              >
+                Terms
+              </a>
+              <a
+                href="#"
+                className="hover:text-neutral-900 dark:hover:text-white transition-colors"
+              >
+                Contact
+              </a>
             </div>
-            
+
             <div className="text-neutral-600 dark:text-neutral-400 text-sm">
               © 2025 Dialectica AI. All rights reserved.
             </div>

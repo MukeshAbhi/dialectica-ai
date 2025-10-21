@@ -6,7 +6,7 @@ import { IconMessage } from "@tabler/icons-react";
 import { getSocket } from "@/lib/socket";
 import { MessageInput } from "./message-input";
 
-interface ChatPageProps { }
+interface ChatPageProps {}
 
 // added this for the structure of messages
 interface ChatMessage {
@@ -204,7 +204,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 
   return (
     <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
-
       <div className="flex flex-1">
         <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
           <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
