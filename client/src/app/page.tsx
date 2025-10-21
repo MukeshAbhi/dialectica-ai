@@ -1,232 +1,243 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getSocket } from "@/lib/socket";
-import { signOut, useSession } from "next-auth/react";
-import { Button } from "@/components/ui/button";
+import { motion } from "motion/react";
+import {
+  IconMessage,
+  IconUsers,
+  IconBrain,
+  IconSparkles,
+  IconArrowRight,
+  IconPlayerPlay,
+  IconShield,
+  IconBolt,
+} from "@tabler/icons-react";
+import { Navbar } from "@/components/navigation/Navbar";
 
-const HomePage: React.FC = () => {
-  const [roomName, setRoomName] = useState("");
-  const router = useRouter();
-  const socketRef = useRef<SocketIOClient.Socket | null>(null);
-  const { data: session, status } = useSession();
-  const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const [loading, setLoading] = useState(false);
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  delay?: number;
+}
 
-  // useEffect(() => {
-  //   socketRef.current = getSocket();
+interface StatCounterProps {
+  target: number | string;
+  label: string;
+  suffix?: string;
+  delay?: number;
+}
 
-  //   socketRef.current.on("connect", () => {
-  //     setIsSocketConnected(true);
-  //     console.log("Socket connected:", socketRef.current?.id);
-  //   });
-
-  //   socketRef.current.on("disconnect", () => {
-  //     setIsSocketConnected(false);
-  //     console.log("Socket disconnected");
-  //   });
-
-  //   socketRef.current.on("randomRoomFound", (roomId: string) => {
-  //     console.log("Random room found:", roomId);
-
-  //     router.push(`/debate/${roomId}?fromRandom=true`); // adding a query parameter to indicate the room was joined randomly.
-  //   });
-
-  //   // room availability response [WORKS FOR NOW - but needs to be improved]
-  //   socketRef.current.on(
-  //     "roomAvailabilityResponse",
-  //     (response: {
-  //       roomId: string;
-  //       exists: boolean;
-  //       isFull: boolean;
-  //       currentUsers: number;
-  //       maxUsers: number;
-  //     }) => {
-  //       console.log("Room availability response:", response);
-
-  //       if (response.exists && response.isFull) {
-  //         alert(
-  //           `Room "${response.roomId}" is full (${response.currentUsers}/${response.maxUsers} users). Please try another room.`
-  //         );
-  //         return;
-  //       }
-
-  //       if (response.exists) {
-  //         const confirmJoin = confirm(
-  //           `Room "${response.roomId}" already exists with ${response.currentUsers} user(s). Do you want to join it?`
-  //         );
-  //         if (!confirmJoin) {
-  //           return;
-  //         }
-  //       }
-
-  //       // Navigate to the room
-  //       router.push(`/debate/${encodeURIComponent(response.roomId)}`);
-  //     }
-  //   );
-
-  //   // Handle socket connection errors [PENDING]
-
-  //   // Check if already connected
-  //   if (socketRef.current.connected) {
-  //     setIsSocketConnected(true);
-  //   }
-
-  //   return () => {
-  //     if (socketRef.current) {
-  //       socketRef.current.off("connect");
-  //       socketRef.current.off("disconnect");
-  //       socketRef.current.off("randomRoomFound");
-  //       socketRef.current.off("roomAvailabilityResponse");
-  //     }
-  //   };
-  // }, [router]);
-
-  // const handleJoinRandomRoom = () => {
-  //   if (!isSocketConnected) {
-  //     alert("Not connected to server yet, please try again...");
-  //     return;
-  //   }
-  //   if (socketRef.current) {
-  //     socketRef.current.emit("requestRandomRoom");
-  //   }
-  // };
-
-  // const handleJoinRoom = () => {
-  //   const trimmedRoomName = roomName.trim();
-
-  //   // if (trimmedRoomName) {
-  //   // Navigate to the debate room
-  //   // router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
-  //   // }
-  //   if (trimmedRoomName && socketRef.current && isSocketConnected) {
-  //     // Check room availability first
-  //     socketRef.current.emit("checkRoomAvailability", trimmedRoomName);
-  //   } else if (!isSocketConnected) {
-  //     alert("Not connected to server yet, please try again...");
-  //   }
-  // };
-
-  // const handleCreateRandomRoom = () => {
-  //     // Generate a random room ID
-  //     const randomId = Math.random().toString(36).substring(2, 8);
-  //     router.push(`/debate/${randomId}`);
-  // };
-
-  // 🔹 handle loading state first
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-neutral-900">
-        <p className="text-neutral-600 dark:text-neutral-400">Loading session...</p>
-      </div>
-    );
-  }
-
-  // handle unauthenticated
-  if (status === "unauthenticated") {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
-              Dialectica AI
-            </h1>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-              Please sign in to join debates
-            </p>
-            <Button
-              variant="default"
-              size="lg"
-              onClick={() => router.push("/signin")}
-              className="bg-blue-700 text-white hover:bg-blue-800 "
-            >
-              Sign In to Continue
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, delay = 0 }) => {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
-              Dialectica AI
-            </h1>
-            <Button
-              variant="destructive"
-              onClick={() => signOut()}
-              className="bg-red-400 text-white hover:bg-red-600"
-            >
-              Sign Out
-            </Button>
-          </div>
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Welcome back, {session?.user?.name || "Debater"}! Join or create a debate room to get
-            started.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <input
-              type="text"
-              value={roomName}
-              onChange={(e) => setRoomName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const trimmedRoomName = roomName.trim();
-                  if (trimmedRoomName) {
-                    router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
-                  }
-                }
-              }}
-              placeholder="Enter room name..."
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <button
-            onClick={() => {
-              const trimmedRoomName = roomName.trim();
-              if (trimmedRoomName) {
-                router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
-              }
-            }}
-            disabled={!roomName.trim()}
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
-          >
-            Join Room
-          </button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-neutral-600" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400">
-                Or
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              const randomId = Math.random().toString(36).substring(2, 8);
-              router.push(`/debate/${randomId}`);
-            }}
-            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition cursor-pointer"
-          >
-            Create Random Room
-          </button>
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      className="group p-6 rounded-xl bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg"
+    >
+      <div className="w-12 h-12 mb-4 rounded-lg bg-blue-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        {icon}
       </div>
-    </div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+      <p className="text-sm text-gray-600 dark:text-neutral-400 leading-relaxed">{description}</p>
+    </motion.div>
   );
 };
 
-export default HomePage;
+const StatCounter: React.FC<StatCounterProps> = ({ target, label, suffix = "", delay = 0 }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      className="text-center p-4"
+    >
+      <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+        {target.toLocaleString()}
+        {suffix}
+      </div>
+      <div className="text-xs md:text-sm text-gray-600 dark:text-neutral-400 uppercase tracking-wider font-medium">
+        {label}
+      </div>
+    </motion.div>
+  );
+};
+
+export default function LandingPage() {
+  const features = [
+    {
+      icon: <IconBrain className="w-6 h-6" />,
+      title: "AI-Powered Debates",
+      description:
+        "Engage in intelligent discussions powered by advanced AI that understands context and nuance.",
+    },
+    {
+      icon: <IconUsers className="w-6 h-6" />,
+      title: "Real-time Collaboration",
+      description:
+        "Connect with debaters worldwide in real-time rooms designed for structured discourse.",
+    },
+    {
+      icon: <IconShield className="w-6 h-6" />,
+      title: "Secure & Private",
+      description:
+        "Your conversations are protected with end-to-end encryption and privacy-first design.",
+    },
+    {
+      icon: <IconBolt className="w-6 h-6" />,
+      title: "Lightning Fast",
+      description:
+        "Experience instant responses and seamless interactions with our optimized platform.",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen overflow-x-hidden">
+      <Navbar />
+      {/* Hero Section */}
+      <section className="relative px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-12 md:pb-16">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-8 md:mb-12"
+          >
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">
+              Dialectica AI
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-neutral-400 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed px-4">
+              Experience the future of intellectual discourse. Engage in debates that challenge your
+              thinking and expand your perspectives.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 md:mb-16 px-4">
+              <button className="group px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2">
+                <IconPlayerPlay className="w-5 h-5" />
+                Start Debating
+                <IconArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button className="px-6 md:px-8 py-3 md:py-4 bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-gray-100 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors">
+                Watch Demo
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-4xl mx-auto">
+              <StatCounter target={50} label="Debates" suffix="+" delay={0.2} />
+              <StatCounter target={100} label="Users" suffix="+" delay={0.4} />
+              <StatCounter target={"Vercel"} label="Hosted on" delay={0.6} />
+              <StatCounter target={"Next.js"} label="Tech stack" delay={0.8} />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="relative px-4 sm:px-6 lg:px-8 py-12 md:py-20 bg-white dark:bg-neutral-900">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 md:mb-12"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 text-gray-900 dark:text-gray-100">
+              Powerful Features
+            </h2>
+            <p className="text-base md:text-lg text-gray-600 dark:text-neutral-400 max-w-2xl mx-auto px-4">
+              Discover the tools that make Dialectica AI the premier platform for intellectual
+              discourse.
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                delay={index * 0.1}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-gradient-to-br from-slate-900 to-slate-600 rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 sm:p-8 md:p-12 text-center"
+          >
+            <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-blue-600 rounded-2xl mb-4 md:mb-6">
+              <IconSparkles className="w-7 h-7 md:w-8 md:h-8 text-white" />
+            </div>
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-6 text-gray-900 dark:text-gray-100">
+              Ready to Elevate Your Discourse?
+            </h3>
+            <p className="text-base md:text-lg text-gray-600 dark:text-neutral-400 mb-6 md:mb-8 max-w-2xl mx-auto leading-relaxed">
+              Join hundreds of thinkers, debaters, and curious minds using Dialectica AI to enhance
+              their intellectual journey.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <button className="px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-300">
+                Join the Community
+              </button>
+              <button className="px-6 md:px-8 py-3 md:py-4 bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-gray-100 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors">
+                Learn More
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative px-4 sm:px-6 lg:px-8 py-8 md:py-12 border-t border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <IconMessage className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Dialectica AI
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 md:gap-6 text-sm text-gray-600 dark:text-neutral-400">
+              <a
+                href="#"
+                className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              >
+                Privacy
+              </a>
+              <a
+                href="#"
+                className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              >
+                Terms
+              </a>
+              <a
+                href="#"
+                className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              >
+                Contact
+              </a>
+            </div>
+
+            <div className="text-sm text-gray-600 dark:text-neutral-400">© 2025 Dialectica AI</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
