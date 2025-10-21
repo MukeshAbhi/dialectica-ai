@@ -42,7 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
     <nav
       className={`fixed top-0 left-0 right-0 z-[999] transition-all duration-300 ${
         isScrolled
-          ? "text-white backdrop-blur-lg border-b border-neutral-200 bg-white/90"
+          ? "text-white backdrop-blur-lg border-b border-neutral-200"
           : "bg-transparent"
       } ${className}`}
     >
