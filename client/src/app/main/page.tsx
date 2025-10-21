@@ -181,7 +181,7 @@ const HomePage: React.FC = () => {
                 if (e.key === "Enter") {
                   const trimmedRoomName = roomName.trim();
                   if (trimmedRoomName) {
-                    router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+                    router.push(`/main/debate/${encodeURIComponent(trimmedRoomName)}`);
                   }
                 }
               }}
@@ -194,7 +194,7 @@ const HomePage: React.FC = () => {
             onClick={() => {
               const trimmedRoomName = roomName.trim();
               if (trimmedRoomName) {
-                router.push(`/debate/${encodeURIComponent(trimmedRoomName)}`);
+                router.push(`/main/debate/${encodeURIComponent(trimmedRoomName)}`);
               }
             }}
             disabled={!roomName.trim()}
@@ -217,7 +217,7 @@ const HomePage: React.FC = () => {
           <button
             onClick={() => {
               const randomId = Math.random().toString(36).substring(2, 8);
-              router.push(`/debate/${randomId}`);
+              router.push(`/main/debate/${randomId}`);
             }}
             className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition cursor-pointer"
           >

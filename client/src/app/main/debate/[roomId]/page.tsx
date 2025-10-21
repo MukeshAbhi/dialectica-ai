@@ -185,7 +185,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
   }, [messages]);
 
   const handleLeaveRoom = () => {
-    router.push("/");
+    router.push("/main");
   };
 
   const handleSend = (message: string) => {
