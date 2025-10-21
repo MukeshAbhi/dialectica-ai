@@ -169,7 +169,7 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 sm:p-8 md:p-12 text-center"
+            className="bg-gradient-to-br from-slate-900 to-slate-600 rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 sm:p-8 md:p-12 text-center"
           >
             <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-blue-600 rounded-2xl mb-4 md:mb-6">
               <IconSparkles className="w-7 h-7 md:w-8 md:h-8 text-white" />
