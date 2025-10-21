@@ -42,7 +42,7 @@ export default function RoomPage() {
             {roomArr.map((room, idx) => (
               <Card key={idx} className="hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-xl text-neutral-900 dark:text-neutral-100">
+                  <CardTitle className="text-xl text-neutral-900 dark:text-neutral-900">
                     {room.title}
                   </CardTitle>
                   <CardAction>
