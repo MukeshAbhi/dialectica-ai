@@ -14,7 +14,7 @@ export default function CustomSignIn() {
     setIsLoading(true);
     setError("");
     try {
-      await signIn(provider, { callbackUrl: "/" });
+      await signIn(provider, { callbackUrl: "/main" });
     } catch (err: any) {
       setError("An error occurred during sign in.");
       setIsLoading(false);
