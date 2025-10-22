@@ -332,6 +332,3 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 };
 
 export default ChatPage;
-
-//how to change the background of messages from gray to blue
-//Answer: we will do the following:  
