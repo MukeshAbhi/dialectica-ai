@@ -14,6 +14,7 @@ const HomePage: React.FC = () => {
   const { data: session, status } = useSession();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isJoiningRandom, setIsJoiningRandom] = useState(false);
 
   // useEffect(() => {
   //   socketRef.current = getSocket();
@@ -115,6 +116,26 @@ const HomePage: React.FC = () => {
   //     router.push(`/debate/${randomId}`);
   // };
 
+  const handleJoinRandomRoom = async () => {
+    setIsJoiningRandom(true);
+    try {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5003';
+      const response = await fetch(`${BACKEND_URL}/api/rooms/random`);
+      
+      if (!response.ok) {
+        throw new Error('No available rooms');
+      }
+      
+      const data = await response.json();
+      router.push(`/main/debate/${data.roomId}`);
+    } catch (error) {
+      console.error('Error joining random room:', error);
+      alert('No available rooms with space. Please create a new room or try again later.');
+    } finally {
+      setIsJoiningRandom(false);
+    }
+  };
+
   // 🔹 handle loading state first
   if (status === "loading") {
     return (
@@ -199,18 +220,27 @@ const HomePage: React.FC = () => {
             />
           </div>
 
-          <button
-            onClick={() => {
-              const trimmedRoomName = roomName.trim();
-              if (trimmedRoomName) {
-                router.push(`/main/debate/${encodeURIComponent(trimmedRoomName)}`);
-              }
-            }}
-            disabled={!roomName.trim()}
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
-          >
-            Join Room
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleJoinRandomRoom}
+              disabled={isJoiningRandom}
+              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
+            >
+              {isJoiningRandom ? "Joining..." : "Random"}
+            </button>
+            <button
+              onClick={() => {
+                const trimmedRoomName = roomName.trim();
+                if (trimmedRoomName) {
+                  router.push(`/main/debate/${encodeURIComponent(trimmedRoomName)}`);
+                }
+              }}
+              disabled={!roomName.trim()}
+              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition cursor-pointer"
+            >
+              Join Room
+            </button>
+          </div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">

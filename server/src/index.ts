@@ -31,6 +31,31 @@ app.get('/', (req, res) => {
 // Register the enhance router BEFORE socket.io handlers
 app.use(enhanceRouter);
 
+// Get random room with available space
+app.get('/api/rooms/random', (req, res) => {
+    console.log('Request for random room received');
+    
+    // Filter rooms that have space
+    const availableRooms = Object.entries(rooms).filter(
+        ([_, participants]) => participants.size < MAX_ROOM_CAPACITY
+    );
+
+    if (availableRooms.length === 0) {
+        res.status(404).json({ error: 'No available rooms with space' });
+        return;
+    }
+
+    // Select a random room
+    const randomIndex = Math.floor(Math.random() * availableRooms.length);
+    const [roomId, participants] = availableRooms[randomIndex];
+
+    res.json({
+        roomId: roomId,
+        userCount: participants.size,
+        maxCapacity: MAX_ROOM_CAPACITY
+    });
+});
+
 const rooms: { [roomId: string]: Set<string> } = {};
 const socketToUser: { [socketId: string]: string } = {};
 const roomMessages: {
