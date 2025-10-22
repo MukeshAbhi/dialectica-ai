@@ -41,7 +41,7 @@ function SideBar() {
           <SidebarLink
             link={{
               label: "Anant Kavuru",
-              href: "#",
+              href: "/settings",
               icon: (
                 <div className="h-7 w-7 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
                   AK
