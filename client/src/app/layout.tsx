@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import React from "react";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +50,7 @@ export default function RootLayout({
             {/* Main Content - top layer */}
             <div className="relative z-20">
               {children}
+              <Toaster position="top-right" richColors />
             </div>
           </div>
         </body>
