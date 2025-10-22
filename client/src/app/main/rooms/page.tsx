@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardAction,
@@ -9,14 +11,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { IconUsers, IconUser } from "@tabler/icons-react";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function RoomPage() {
+  const router = useRouter();
+  
   const roomArr = [
-    { title: "Cats are better than dogs", roomOwner: "Ada Lovelace", totalMembers: "2" },
-    { title: "Winter is better than summer", roomOwner: "Linus Torvalds", totalMembers: "8" },
-    { title: "Homework should be banned", roomOwner: "Grace Hopper", totalMembers: "4" },
-    { title: "Weekends should be 3 days long", roomOwner: "James Gosling", totalMembers: "6" },
+    { title: "Cats are better than dogs", roomOwner: "Ada Lovelace", totalMembers: "2", roomId: "cats-vs-dogs" },
+    { title: "Winter is better than summer", roomOwner: "Linus Torvalds", totalMembers: "8", roomId: "winter-summer" },
+    { title: "Homework should be banned", roomOwner: "Grace Hopper", totalMembers: "4", roomId: "homework-debate" },
+    { title: "Weekends should be 3 days long", roomOwner: "James Gosling", totalMembers: "6", roomId: "3day-weekend" },
   ];
+
+  const handleJoinRoom = (roomId: string) => {
+    router.push(`/main/debate/${roomId}`);
+  };
+
+  const handleCreateRoom = () => {
+    const randomId = Math.random().toString(36).substring(2, 8);
+    router.push(`/main/debate/${randomId}`);
+  };
 
   return (
     <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
@@ -32,7 +46,10 @@ export default function RoomPage() {
                 Join a debate room or create your own
               </p>
             </div>
-            <Button className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+            <Button 
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              onClick={handleCreateRoom}
+            >
               Create Room
             </Button>
           </div>
@@ -46,7 +63,11 @@ export default function RoomPage() {
                     {room.title}
                   </CardTitle>
                   <CardAction>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button 
+                      size="sm" 
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => handleJoinRoom(room.roomId)}
+                    >
                       Join
                     </Button>
                   </CardAction>

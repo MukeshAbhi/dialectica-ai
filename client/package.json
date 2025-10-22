@@ -4,7 +4,8 @@
     "description": "Frontend client for Dialectica AI - A real-time debate platform",
     "private": true,
     "scripts": {
-        "dev": "next dev -p 3001",
+        "dev": "npx prisma generate && next dev -p 3001",
+        "prebuild": "npx prisma generate",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
@@ -13,6 +14,7 @@
     },
     "dependencies": {
         "@auth/prisma-adapter": "^2.11.0",
+        "@google/generative-ai": "^0.24.1",
         "@hookform/resolvers": "^5.2.2",
         "@prisma/client": "^6.17.1",
         "@prisma/extension-accelerate": "^2.0.2",
@@ -25,7 +27,7 @@
         "clsx": "^2.1.1",
         "lucide-react": "^0.525.0",
         "motion": "^12.23.6",
-        "next": "15.3.5",
+        "next": "^15.5.6",
         "next-auth": "^5.0.0-beta.29",
         "postcss": "^8.4.31",
         "react": "^19.0.0",
@@ -41,9 +43,10 @@
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "@types/socket.io-client": "^1.4.36",
+        "eslint": "^9.38.0",
         "prisma": "^6.17.1",
         "tsx": "^4.20.6",
         "tw-animate-css": "^1.3.5",
-        "typescript": "^5"
+        "typescript": "^5.9.3"
     }
 }

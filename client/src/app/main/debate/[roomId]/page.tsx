@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { IconMessage } from "@tabler/icons-react";
 import { getSocket } from "@/lib/socket";
+import { MessageInput } from "./message-input";
 
 interface ChatPageProps {}
 
@@ -183,15 +184,17 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Functions to handle sending messages:
-  const handleSend = () => {
-    if (messageInput.trim() && roomId && socketRef.current && isConnected) {
-      console.log("📤 [Client] Sending message to room:", roomId, "Message:", messageInput);
-      socketRef.current.emit("sendMessage", messageInput, roomId);
-      setMessageInput("");
+  const handleLeaveRoom = () => {
+    router.push("/main");
+  };
+
+  const handleSend = (message: string) => {
+    if (message.trim() && roomId && socketRef.current && isConnected) {
+      console.log("[Client] Sending message to room:", roomId, "Message:", message);
+      socketRef.current.emit("sendMessage", message, roomId);
     } else {
-      console.warn("⚠️ [Client] Cannot send message:", {
-        hasInput: !!messageInput.trim(),
+      console.warn("[Client] Cannot send message:", {
+        hasInput: !!message.trim(),
         hasRoomId: !!roomId,
         hasSocket: !!socketRef.current,
         isConnected,
@@ -199,15 +202,8 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     }
   };
 
-  const handleLeaveRoom = () => {
-    router.push("/");
-  };
-
   return (
     <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
-
-      {/* Main Chat Area UI which is better now */}
-
       <div className="flex flex-1">
         <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
           <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
@@ -322,21 +318,12 @@ const ChatPage: React.FC<ChatPageProps> = () => {
           </div>
 
           <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-neutral-700">
-            <input
-              type="text"
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Type your message..."
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            <MessageInput
+              messageInput={messageInput}
+              setMessageInput={setMessageInput}
+              onSend={handleSend}
+              isConnected={isConnected}
             />
-            <button
-              onClick={handleSend}
-              disabled={!isConnected || !messageInput.trim()}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-xl font-medium transition-colors disabled:cursor-not-allowed"
-            >
-              Send
-            </button>
           </div>
         </div>
       </div>

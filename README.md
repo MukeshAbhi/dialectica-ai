@@ -54,7 +54,19 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    cd dialectica-ai
    ```
 
-2. **Install dependencies**
+**Option 1: Run with Docker**
+
+1. **Build and run the Docker containers**
+   ```bash
+   docker-compose up --build
+   ```
+2. **Access the application**
+   - Frontend: http://localhost:3001
+   - Backend: http://localhost:5003
+
+**Option 2: Run both servers manually**
+
+1. **Install dependencies**
    ```bash
    # Install server dependencies
    cd server
@@ -65,7 +77,7 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm install
    ```
 
-3. **Database Setup**
+2. **Database Setup**
    ```bash
    cd server
    # Set up your DATABASE_URL in .env file
@@ -73,9 +85,12 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
 
    # Run database migrations
    npx prisma migrate dev
+
+   # Generate Prisma client
+   npx prisma generate
    ```
 
-4. **Start the development servers**
+3. **Start the development servers**
 
    **Terminal 1 - Backend:**
    ```bash
@@ -89,7 +104,7 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm run dev
    ```
 
-5. **Access the application**
+4. **Access the application**
    - Frontend: http://localhost:3001
    - Backend: http://localhost:5003
 
@@ -103,15 +118,18 @@ dialectica-ai/
 │   │   ├── components/    # UI building blocks 
 │   │   ├── hooks/         # Custom React logic
 │   │   └── lib/           # Utility functions and configurations
-│   └── types/             # TypeScript type definitions
+│   │   └── generated/     # Prisma generated client
+│   └── prisma/            # Prisma schema and migrations
+│   
 ├── server/                # Express.js backend application
 │   ├── src/
-│   │   ├── routers/       # API route handlers
-│   │   ├── services/      # Business logic
-│   │   ├── sockets/       # Socket.io event handlers
-│   │   └── index.ts       # Server entry point
-│   └── prisma/            # Database schema and migrations
-└── docs/                  # Documentation
+│       ├── routers/       # API route handlers
+│       ├── services/      # Business logic
+│       ├── sockets/       # Socket.io event handlers
+│       └── index.ts       # Server entry point
+|── docker-compose.yml     # Docker configuration
+└── README.md              # Project documentation
+
 ```
 
 ## Usage
