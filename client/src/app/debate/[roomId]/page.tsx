@@ -273,7 +273,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                             {msg.user.substring(0, 2).toUpperCase()}
                           </div>
                           <div
-                            className={`flex-1 min-w-0 max-w-[75%] ${isOwnMessage ? "text-right" : ""}`}
+                            className={`min-w-0 max-w-[75%] ${isOwnMessage ? "ml-auto" : ""}`}
                           >
                             <div
                               className={`flex items-center gap-2 mb-1 ${isOwnMessage ? "flex-row-reverse" : ""}`}
@@ -332,3 +332,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
 };
 
 export default ChatPage;
+
+//how to change the background of messages from gray to blue
+//Answer: we will do the following:  
