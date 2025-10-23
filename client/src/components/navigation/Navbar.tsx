@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               </Button>
             )}
             <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Link href="/main">Get Started</Link>
+              <Link href={session ? "/main" : "/main/signin"}>Get Started</Link>
             </Button>
           </div>
 
