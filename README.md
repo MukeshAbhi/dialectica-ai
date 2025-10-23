@@ -77,8 +77,8 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm install
    ```
 2. **Create your .env Files**
-      Refer to the Environment Variables
-      section below for required configurations on both client and server.
+Refer to the Environment Variables
+section below for required configurations on both client and server.
 
 
 
