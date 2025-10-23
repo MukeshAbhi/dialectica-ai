@@ -85,7 +85,6 @@ section below for required configurations on both client and server.
 3. **Database Setup**
 
    *Make sure postgres is installed as told in the prerequisites then run the following:*
-      Bash
       ```bash
       # Create database in postgres
       PGPASSWORD=<password> psql -U <username> -h localhost -c "CREATE DATABASE dialectica_ai;"
