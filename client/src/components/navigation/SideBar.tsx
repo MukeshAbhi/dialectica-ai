@@ -18,15 +18,15 @@ const LogoutButton = ({ callbackUrl }: LogoutButtonProps) => {
   const handleLogout = async () => {
     try {
       // Show toast immediately
-      toast.success("Successfully logged out", { duration: 5000 });
+      
 
       // Prevent automatic redirect from signOut
       await signOut({ redirect: false });
 
-      // Delay navigation slightly so toast is visible
-      setTimeout(() => {
-        router.push(callbackUrl);
-      }, 1000); // 1 second delay
+      toast.success("Successfully logged out", { duration: 5000 });
+
+      router.push(callbackUrl);
+      
     } catch (error) {
       console.error("Error during sign out:", error);
       toast.error("Error logging out. Please try again.", { duration: 5000 });
@@ -52,7 +52,7 @@ const LogoutButton = ({ callbackUrl }: LogoutButtonProps) => {
 function SideBar() {
   const { data: session } = useSession();
 
-  const LOGOUT_REDIRECT_PATH = "/"; 
+  
 
   const links = [
     {
