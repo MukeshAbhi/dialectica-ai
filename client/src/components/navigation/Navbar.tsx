@@ -172,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                       asChild
                       className="justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     >
-                      <Link href="/main">Get Started</Link>
+                      <Link href={session ? "/main" : "/main/signin"}>Get Started</Link>
                     </Button>
                 </div>
               </div>
