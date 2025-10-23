@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { useSession, signOut } from "next-auth/react";
@@ -82,17 +83,52 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
           {/* Right side - Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
-            >
-              <Link href="/main/signin">Sign In</Link>
-            </Button>
-            <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Link href={session ? "/main" : "/main/signin"}>Get Started</Link>
-            </Button>
+            {session ? (
+              <>
+                <Link 
+                  href="/main/settings" 
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                >
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user?.name || "User"}
+                      width={32}
+                      height={32}
+                      className="rounded-full border-2 border-blue-600 dark:border-blue-400"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full border-2 border-blue-600 dark:border-blue-400 bg-gray-300 dark:bg-neutral-600 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                      </span>
+                    </div>
+                  )}
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => signOut()}
+                  className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
+                >
+                  <Link href="/main/signin">Sign In</Link>
+                </Button>
+                <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Link href="/main/signin">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -137,6 +173,36 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               <div className="pt-4 pb-2 border-t border-neutral-200">
                 <div className="flex flex-col space-y-2">
                   {session ? (
+                    <>
+                      <Link
+                        href="/main/settings"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+                      >
+                        {session.user?.image ? (
+                          <Image
+                            src={session.user.image}
+                            alt={session.user?.name || "User"}
+                            width={40}
+                            height={40}
+                            className="rounded-full border-2 border-blue-600 dark:border-blue-400"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full border-2 border-blue-600 dark:border-blue-400 bg-gray-300 dark:bg-neutral-600 flex items-center justify-center">
+                            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                              {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {session.user?.name}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            View Profile
+                          </span>
+                        </div>
+                      </Link>
                       <Button
                         variant="destructive"
                         size="sm"
@@ -148,7 +214,9 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                       >
                         Sign Out
                       </Button>
+                    </>
                   ) : (
+                    <>
                       <Button
                         variant="outline"
                         size="sm"
@@ -157,14 +225,15 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                       >
                         <Link href="/main/signin">Sign In</Link>
                       </Button>
+                      <Button
+                        size="sm"
+                        asChild
+                        className="justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        <Link href="/main/signin">Get Started</Link>
+                      </Button>
+                    </>
                   )}
-                    <Button
-                      size="sm"
-                      asChild
-                      className="justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
-                      <Link href={session ? "/main" : "/main/signin"}>Get Started</Link>
-                    </Button>
                 </div>
               </div>
             </div>

@@ -89,7 +89,7 @@ function SideBar() {
             {links.map((link, idx) => (
               <SidebarLink key={idx} link={link} />
             ))}
-            <LogoutButton callbackUrl={LOGOUT_REDIRECT_PATH} />
+            <LogoutButton callbackUrl={"/main"} />
           </div>
         </div>
         <div>
