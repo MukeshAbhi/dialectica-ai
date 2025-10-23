@@ -171,7 +171,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         }
       };
     }
-  }, [roomId]);
+  }, [roomId, hasAddedWelcomeMessage]);
 
   // Reference to the end of messages for auto-scrolling:
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -203,16 +203,16 @@ const ChatPage: React.FC<ChatPageProps> = () => {
   };
 
   return (
-    <div className="rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-screen mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
-      <div className="flex flex-1">
-        <div className="p-6 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-6 flex-1 w-full h-full overflow-auto">
-          <div className="flex justify-between items-center pb-6 border-b border-gray-200 dark:border-neutral-700">
-            <div>
-              <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+    <div className="flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full max-w-screen mx-auto border-0 md:border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen md:rounded-md">
+      <div className="flex flex-1 w-full">
+        <div className="p-4 md:p-6 lg:p-10 md:rounded-tl-2xl border-0 md:border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 md:gap-6 flex-1 w-full h-full overflow-hidden">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 md:pb-6 border-b border-gray-200 dark:border-neutral-700 gap-3 sm:gap-0 flex-shrink-0">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-neutral-900 dark:text-neutral-100 truncate">
                 Dialectica AI
               </h2>
-              <div className="flex items-center gap-4 mt-2">
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+                <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400 truncate">
                   Room:{" "}
                   <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
                     {roomId}
@@ -232,54 +232,54 @@ const ChatPage: React.FC<ChatPageProps> = () => {
             </div>
             <button
               onClick={handleLeaveRoom}
-              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+              className="px-4 py-2 md:px-5 md:py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors text-sm md:text-base whitespace-nowrap flex-shrink-0"
             >
               Leave Room
             </button>
           </div>
 
-          <div className="border border-gray-200 dark:border-neutral-700 rounded-xl p-6 h-[480px] bg-white dark:bg-neutral-800 flex-1 overflow-y-auto">
+          <div className="border border-gray-200 dark:border-neutral-700 rounded-xl p-3 md:p-6 flex-1 bg-white dark:bg-neutral-800 overflow-y-auto min-h-0">
             {messages.length === 0 ? (
-              <div className="h-full flex items-center justify-center">
+              <div className="h-full flex items-center justify-center px-4">
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-neutral-700 rounded-full flex items-center justify-center">
-                    <IconMessage className="w-8 h-8 text-gray-400" />
+                  <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 bg-gray-100 dark:bg-neutral-700 rounded-full flex items-center justify-center">
+                    <IconMessage className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-500 dark:text-neutral-400 text-lg font-medium">
+                  <p className="text-gray-500 dark:text-neutral-400 text-base md:text-lg font-medium">
                     No messages yet
                   </p>
-                  <p className="text-gray-400 dark:text-neutral-500 text-sm mt-1">
+                  <p className="text-gray-400 dark:text-neutral-500 text-xs md:text-sm mt-1">
                     Start the conversation!
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 md:gap-4">
                 {messages.map((msg, idx) => {
                   const isOwnMessage = msg.sender === currentUserId;
                   return (
                     <div key={idx} className={`${msg.type === "system" ? "text-center" : ""}`}>
                       {msg.type === "system" ? (
-                        <div className="flex justify-center">
-                          <div className="px-4 py-2 bg-blue-100 dark:bg-blue-600/5 rounded-full text-sm text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        <div className="flex justify-center px-2">
+                          <div className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 dark:bg-blue-600/5 rounded-full text-xs md:text-sm text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 max-w-full break-words">
                             {msg.content}
                           </div>
                         </div>
                       ) : (
-                        <div className={`flex gap-3 ${isOwnMessage ? "flex-row-reverse" : ""}`}>
+                        <div className={`flex gap-2 md:gap-3 ${isOwnMessage ? "flex-row-reverse" : ""} px-1`}>
                           <div
-                            className={`w-10 h-10 ${isOwnMessage ? "bg-green-500" : "bg-blue-500"} rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0`}
+                            className={`w-8 h-8 md:w-10 md:h-10 ${isOwnMessage ? "bg-green-500" : "bg-blue-500"} rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold flex-shrink-0`}
                           >
                             {msg.user.substring(0, 2).toUpperCase()}
                           </div>
                           <div
-                            className={`min-w-0 max-w-[75%] ${isOwnMessage ? "ml-auto" : ""}`}
+                            className={`min-w-0 max-w-[calc(100%-3rem)] md:max-w-[75%] ${isOwnMessage ? "ml-auto" : ""}`}
                           >
                             <div
                               className={`flex items-center gap-2 mb-1 ${isOwnMessage ? "flex-row-reverse" : ""}`}
                             >
                               <span
-                                className={`text-sm font-semibold ${msg.role === "pro" ? "text-blue-600" : msg.role === "con" ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}
+                                className={`text-xs md:text-sm font-semibold truncate ${msg.role === "pro" ? "text-blue-600" : msg.role === "con" ? "text-red-600" : "text-gray-900 dark:text-gray-100"}`}
                               >
                                 {isOwnMessage
                                   ? "You"
@@ -287,7 +287,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                                     ? msg.user.substring(0, 15) + "..."
                                     : msg.user}
                               </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                                 {new Date(msg.timestamp || Date.now()).toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -295,13 +295,11 @@ const ChatPage: React.FC<ChatPageProps> = () => {
                               </span>
                             </div>
 
-                            {/* bruh */}
-
                             <div
-                              className={`${isOwnMessage ? "bg-gray-200 dark:bg-neutral-600 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm" : "bg-gray-50 dark:bg-neutral-700 rounded-2xl rounded-tl-sm"} px-4 py-3 border ${isOwnMessage ? "border-gray-300 dark:border-neutral-500" : "border-gray-200 dark:border-neutral-600"}`}
+                              className={`${isOwnMessage ? "bg-gray-200 dark:bg-neutral-600 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm" : "bg-gray-50 dark:bg-neutral-700 rounded-2xl rounded-tl-sm"} px-3 py-2 md:px-4 md:py-3 border ${isOwnMessage ? "border-gray-300 dark:border-neutral-500" : "border-gray-200 dark:border-neutral-600"} break-words`}
                             >
                               <span
-                                className={`${isOwnMessage ? "text-gray-900 dark:text-gray-100" : "text-gray-900 dark:text-gray-100"} leading-relaxed`}
+                                className={`${isOwnMessage ? "text-gray-900 dark:text-gray-100" : "text-gray-900 dark:text-gray-100"} leading-relaxed text-sm md:text-base`}
                               >
                                 {msg.content}
                               </span>
@@ -317,7 +315,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
             )}
           </div>
 
-          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-neutral-700">
+          <div className="flex gap-2 md:gap-3 pt-4 md:pt-6 border-t border-gray-200 dark:border-neutral-700 flex-shrink-0">
             <MessageInput
               messageInput={messageInput}
               setMessageInput={setMessageInput}
