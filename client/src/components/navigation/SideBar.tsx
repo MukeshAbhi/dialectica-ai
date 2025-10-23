@@ -2,13 +2,58 @@
 
 import React from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { IconHome, IconUsers, IconSettings, IconLogout, IconUser } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { IconHome, IconUsers, IconSettings, IconLogout } from "@tabler/icons-react";
+import { useSession, signOut } from "next-auth/react"; 
 import Image from "next/image";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
+type LogoutButtonProps = {
+  callbackUrl: string;
+};
+
+const LogoutButton = ({ callbackUrl }: LogoutButtonProps) => {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      // Show toast immediately
+      
+
+      // Prevent automatic redirect from signOut
+      await signOut({ redirect: false });
+
+      toast.success("Successfully logged out", { duration: 5000 });
+
+      router.push(callbackUrl);
+      
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      toast.error("Error logging out. Please try again.", { duration: 5000 });
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleLogout}
+      className="w-full text-left"
+    >
+      <SidebarLink
+        link={{
+          label: "Logout",
+          href: "#",
+          icon: <IconLogout className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+        }}
+      />
+    </button>
+  );
+};
 
 function SideBar() {
   const { data: session } = useSession();
+
   
+
   const links = [
     {
       label: "Home",
@@ -23,18 +68,10 @@ function SideBar() {
     {
       label: "Settings",
       href: "/main/settings",
-      icon: (
-        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "/logout",
-      icon: <IconLogout className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+      icon: <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
   ];
 
-  // Get user initials from name
   const getUserInitials = (name: string | null | undefined) => {
     if (!name) return "U";
     const names = name.split(" ");
@@ -43,6 +80,7 @@ function SideBar() {
     }
     return name.substring(0, 2).toUpperCase();
   };
+
   return (
     <Sidebar>
       <SidebarBody className="justify-between gap-10">
@@ -51,6 +89,7 @@ function SideBar() {
             {links.map((link, idx) => (
               <SidebarLink key={idx} link={link} />
             ))}
+            <LogoutButton callbackUrl={LOGOUT_REDIRECT_PATH} />
           </div>
         </div>
         <div>
@@ -77,6 +116,6 @@ function SideBar() {
       </SidebarBody>
     </Sidebar>
   );
-}
+} 
 
 export default SideBar;
