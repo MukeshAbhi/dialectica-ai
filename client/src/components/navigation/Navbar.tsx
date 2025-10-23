@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "../theme/theme-toggle";
 
 interface NavbarProps {
   className?: string;
@@ -77,6 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
 
           {/* Right side - Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"
