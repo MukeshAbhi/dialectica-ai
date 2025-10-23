@@ -150,30 +150,56 @@ dialectica-ai/
 4. **Room Management**: Each room allows only 2 people and cleans up automatically when empty
 
 ## Environment Variables
-
-make sure to add and replace the placeholders of the following .env files:
+**Note:** `.env.example` templates are available in the `server` and `client` folders. Modify them according to your needs. **Do not commit your .env files.**
 
 ### Server (.env) (dialectica-ai/server/)
 ```env
-DATABASE_URL=postgresql://<username>:<password>@localhost:5432/dialectica_ai
+# Server Configuration
 PORT=5003
+NODE_ENV=development
+
+# CORS Origins (comma-separated for multiple origins)
+CORS_ORIGINS=http://localhost:3001,http://localhost:3000
+GEMINI_API_KEY="<your-gemini-api-key-here>"
+
+# Optional: If using authentication
+NEXTAUTH_URL=http://localhost:3001
+NEXTAUTH_SECRET=<your-secret-key-here>
+
+# Optional: If using external services
+API_KEY=<your-api-key>
+JWT_SECRET=<your-jwt-secret>
 ```
 
 ### Client (.env) (dialectica-ai/client/)
 ```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your_clerk_publishable_key_here>
-CLERK_SECRET_KEY=<your_clerk_secret_key_here>
+# Database Configuration
 
-# Custom Clerk Routes
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/auth/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/auth/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+# For local development: 
+DATABASE_URL="postgresql://<username>:<password>@localhost:5432/dialectica_ai"
 
-# API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:5003
-NEXT_PUBLIC_SOCKET_URL=http://localhost:5003
+# For production: Use your database provider's connection string
+
+# NextAuth Configuration
+# Generate a secure secret: openssl rand -base64 32
+AUTH_SECRET="<your-auth-secret>"
+
+NEXTAUTH_URL="http://localhost:3001"
+
+# OAuth Providers (only needed for local social login testing)
+
+# Google OAuth - Get from: https://console.cloud.google.com/apis/credentials
+# Redirect URI should be: {NEXTAUTH_URL}/api/auth/callback/google
+AUTH_GOOGLE_ID="<your-google-client-id>"
+AUTH_GOOGLE_SECRET="<your-google-client-secret>"
+
+# Twitter OAuth - Get from: https://developer.twitter.com/en/portal/dashboard
+# Redirect URI should be: {NEXTAUTH_URL}/api/auth/callback/twitter
+AUTH_TWITTER_ID="<your-twitter-client-id>"
+AUTH_TWITTER_SECRET="<your-twitter-client-secret>"
+
+# Optional: Prisma Accelerate (if using)
+PULSE_API_KEY="<your-pulse-api-key>"
 ```
 
 **Note for Production**: Update `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SOCKET_URL` to your deployed server URL for mobile device compatibility.
