@@ -57,7 +57,7 @@ function SideBar() {
           <SidebarLink
             link={{
               label: session?.user?.name || "User",
-              href: "#",
+              href: "/main/settings",
               icon: session?.user?.image ? (
                 <Image
                   src={session.user.image}
