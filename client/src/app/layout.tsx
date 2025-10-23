@@ -51,6 +51,7 @@ export default function RootLayout({
             {/* Main Content - top layer */}
             <div className="relative z-20">
               {children}
+              <Toaster position="top-right" richColors />
             </div>
           </div>
           </ThemeProvider>
