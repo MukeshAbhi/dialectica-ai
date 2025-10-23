@@ -76,21 +76,31 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    cd ../client
    npm install
    ```
+2. **Create your .env Files**
+      Refer to the Environment Variables
+      section below for required configurations on both client and server.
 
-2. **Database Setup**
-   ```bash
-   cd server
-   # Set up your DATABASE_URL in .env file
-   echo "DATABASE_URL=postgresql://username:password@localhost:5432/dialectica_ai" > .env
 
-   # Run database migrations
-   npx prisma migrate dev
 
-   # Generate Prisma client
-   npx prisma generate
-   ```
+3. **Database Setup**
 
-3. **Start the development servers**
+   *Make sure postgres is installed as told in the prerequisites then run the following:*
+      Bash
+      ```bash
+      # Create database in postgres
+      PGPASSWORD=<password> psql -U <username> -h localhost -c "CREATE DATABASE dialectica_ai;"
+
+      # Go to folder where prisma is located
+      cd client
+
+      # Run database migrations
+      npx prisma migrate dev
+
+      # Generate Prisma client
+      npx prisma generate
+      ```
+
+4. **Start the development servers**
 
    **Terminal 1 - Backend:**
    ```bash
@@ -104,7 +114,7 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm run dev
    ```
 
-4. **Access the application**
+5. **Access the application**
    - Frontend: http://localhost:3001
    - Backend: http://localhost:5003
 
@@ -141,17 +151,19 @@ dialectica-ai/
 
 ## Environment Variables
 
-### Server (.env)
+make sure to add and replace the placeholders of the following .env files:
+
+### Server (.env) (dialectica-ai/server/)
 ```env
-DATABASE_URL=postgresql://username:password@localhost:5432/dialectica_ai
+DATABASE_URL=postgresql://<username>:<password>@localhost:5432/dialectica_ai
 PORT=5003
 ```
 
-### Client (.env)
+### Client (.env) (dialectica-ai/client/)
 ```env
 # Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
-CLERK_SECRET_KEY=your_clerk_secret_key_here
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your_clerk_publishable_key_here>
+CLERK_SECRET_KEY=<your_clerk_secret_key_here>
 
 # Custom Clerk Routes
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/auth/sign-in
