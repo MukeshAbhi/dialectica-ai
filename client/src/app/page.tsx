@@ -12,6 +12,7 @@ import {
   IconBolt,
 } from "@tabler/icons-react";
 import { Navbar } from "@/components/navigation/Navbar";
+import { useRouter } from "next/navigation";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -66,6 +67,8 @@ const StatCounter: React.FC<StatCounterProps> = ({ target, label, suffix = "", d
 };
 
 export default function LandingPage() {
+  const router = useRouter();
+
   const features = [
     {
       icon: <IconBrain className="w-6 h-6" />,
@@ -114,7 +117,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 md:mb-16 px-4">
-              <button className="group px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2">
+              <button onClick={() => router.push('/main/signin')} className="group px-6 md:px-8 py-3 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2">
                 <IconPlayerPlay className="w-5 h-5" />
                 Start Debating
                 <IconArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

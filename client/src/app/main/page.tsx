@@ -166,7 +166,6 @@ const HomePage: React.FC = () => {
                 variant="default"
                 size="lg"
                 onClick={() => router.push("/main/signin")}
-                className="bg-blue-700 text-white hover:bg-blue-800 "
               >
                 Sign In to Continue
               </Button>

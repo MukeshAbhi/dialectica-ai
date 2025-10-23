@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "../theme/theme-toggle";
 
 interface NavbarProps {
   className?: string;
@@ -80,25 +81,15 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
 
           {/* Right side - Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {session ? (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => signOut()}
-                className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
-              >
-                Sign Out
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
-              >
-                <Link href="/main/signin">Sign In</Link>
-              </Button>
-            )}
+            <ThemeToggle />
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
+            >
+              <Link href="/main/signin">Sign In</Link>
+            </Button>
             <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white">
               <Link href={session ? "/main" : "/main/signin"}>Get Started</Link>
             </Button>
