@@ -150,7 +150,7 @@ dialectica-ai/
 
 ## Environment Variables
 
-make sure to add and replace the placeholders of the following .env files:
+Make sure to add and replace the placeholders of the following .env files:
 
 ### Server (.env) (dialectica-ai/server/)
 ```env
