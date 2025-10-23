@@ -77,15 +77,14 @@ Where ideas collide in real time — **Dialectica AI** lets you debate, match, a
    npm install
    ```
 2. **Create your .env Files**
-      Refer to the Environment Variables
-      section below for required configurations on both client and server.
+Refer to the Environment Variables
+section below for required configurations on both client and server.
 
 
 
 3. **Database Setup**
 
    *Make sure postgres is installed as told in the prerequisites then run the following:*
-      Bash
       ```bash
       # Create database in postgres
       PGPASSWORD=<password> psql -U <username> -h localhost -c "CREATE DATABASE dialectica_ai;"
