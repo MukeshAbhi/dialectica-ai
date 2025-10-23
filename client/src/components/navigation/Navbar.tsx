@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
 interface NavbarProps {
@@ -31,6 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const { data: session } = useSession();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -77,16 +80,27 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
 
           {/* Right side - Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
-            >
-              <Link href="/main/signin">Sign In</Link>
-            </Button>
+            {session ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => signOut()}
+                className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-100"
+              >
+                <Link href="/main/signin">Sign In</Link>
+              </Button>
+            )}
             <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Link href="/main/signin">Get Started</Link>
+              <Link href="/main">Get Started</Link>
             </Button>
           </div>
 
@@ -131,21 +145,35 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               ))}
               <div className="pt-4 pb-2 border-t border-neutral-200">
                 <div className="flex flex-col space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="justify-center border-neutral-300"
-                  >
-                    <Link href="/main/signin">Sign In</Link>
-                  </Button>
-                  <Button
-                    size="sm"
-                    asChild
-                    className="justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    <Link href="/main/sign-up">Get Started</Link>
-                  </Button>
+                  {session ? (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          signOut();
+                        }}
+                        className="justify-center border-neutral-300"
+                      >
+                        Sign Out
+                      </Button>
+                  ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="justify-center border-neutral-300"
+                      >
+                        <Link href="/main/signin">Sign In</Link>
+                      </Button>
+                  )}
+                    <Button
+                      size="sm"
+                      asChild
+                      className="justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      <Link href="/main">Get Started</Link>
+                    </Button>
                 </div>
               </div>
             </div>
